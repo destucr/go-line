@@ -1,78 +1,102 @@
 import SwiftUI
 
 struct GameHUDView: View {
-    // These would be @ObservedObject or passed in via state in a real app
-    // For now we'll use simple properties or a shared state
-    var stitches: Int
-    var day: String
-    var time: String
-    var thread: Int
-    var tension: CGFloat
-    var maxTension: CGFloat
-    var level: Int
-    var dayProgress: Float
+    @ObservedObject var hudManager = HUDManager.shared
     
     var onPause: () -> Void
     var onMenu: () -> Void
     
+    // Modern Palette
+    private let primaryDark = Color(white: 0.1)
+    private let primaryLight = Color(white: 0.95)
+    private let accentColor = Color.orange
+    
     var body: some View {
-        ZStack(alignment: .top) {
-            HStack(alignment: .top) {
-                // Left Side: Buttons
-                HStack(spacing: 20) {
+        VStack(spacing: 8) {
+            // Top Bar
+            HStack {
+                // Left: Controls
+                HStack(spacing: 12) {
                     Button(action: onPause) {
-                        Image(systemName: "pause.circle.fill")
-                            .font(.system(size: 36))
-                            .foregroundColor(Color(white: 0.3)) // Charcoal gray
-                            .padding(5)
-                            .contentShape(Rectangle())
+                        Image(systemName: "pause.fill")
+                            .font(.system(size: 18, weight: .bold))
+                            .frame(width: 40, height: 40)
+                            .background(Circle().fill(primaryDark.opacity(0.8)))
+                            .foregroundColor(.white)
                     }
                     
                     Button(action: onMenu) {
-                        Image(systemName: "line.3.horizontal.circle.fill")
-                            .font(.system(size: 36))
-                            .foregroundColor(Color(white: 0.5))
-                            .padding(5)
-                            .contentShape(Rectangle())
+                        Image(systemName: "line.3.horizontal")
+                            .font(.system(size: 18, weight: .bold))
+                            .frame(width: 40, height: 40)
+                            .background(Circle().fill(primaryDark.opacity(0.8)))
+                            .foregroundColor(.white)
                     }
                 }
-                .padding(.leading, 20)
                 
                 Spacer()
                 
-                // Right Side: Info
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("STITCHES: \(stitches)")
-                        .font(.custom("ChalkboardSE-Bold", size: 22))
-                        .foregroundColor(Color(white: 0.2)) // Deep charcoal
-                    
-                    Text("\(day) - \(time) (LVL \(level))")
-                        .font(.custom("ChalkboardSE-Bold", size: 16))
-                        .foregroundColor(Color(white: 0.4))
-                    
-                    Text("THREAD: \(thread)")
-                        .font(.custom("ChalkboardSE-Bold", size: 16))
-                        .foregroundColor(.orange)
+                // Center: Score/Stitches
+                VStack(spacing: 0) {
+                    Text("\(hudManager.stitches)")
+                        .font(.system(size: 28, weight: .black, design: .rounded))
+                        .foregroundColor(primaryDark)
+                    Text("STITCHES")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(primaryDark.opacity(0.6))
                 }
-                .padding(.trailing, 20)
-            }
-            .padding(.top, 10)
-            
-            VStack(spacing: 0) {
-                // Day Cycle Progress (How level ends)
-                ProgressView(value: min(1.0, Double(dayProgress)))
-                    .progressViewStyle(LinearProgressViewStyle(tint: .green))
-                    .frame(height: 3)
-
-                ProgressView(value: min(1.0, Double(stitches) / 150.0))
-                    .progressViewStyle(LinearProgressViewStyle(tint: Color(white: 0.3)))
-                    .frame(height: 3)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(Color.white.opacity(0.9))
+                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                )
                 
-                ProgressView(value: min(1.0, Double(tension) / Double(maxTension)))
-                    .progressViewStyle(LinearProgressViewStyle(tint: tension / maxTension > 0.8 ? .red : .orange))
-                    .frame(height: 3)
+                Spacer()
+                
+                // Right: Thread & Shift
+                VStack(alignment: .trailing, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "f.circle.fill")
+                            .foregroundColor(accentColor)
+                            .font(.system(size: 14))
+                        Text("\(hudManager.thread)")
+                            .font(.system(size: 16, weight: .bold, design: .monospaced))
+                            .foregroundColor(primaryDark)
+                    }
+                    
+                    Text("\(hudManager.day) • \(hudManager.time)")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(primaryDark.opacity(0.7))
+                }
             }
-            .allowsHitTesting(false)
+            .padding(.horizontal, 20)
+            
+            // Network Tension & Shift Progress (Side-by-Side)
+            HStack(spacing: 24) {
+                // Tension Bar
+                ProgressBar(
+                    icon: "waveform.path.ecg",
+                    progress: hudManager.tension / hudManager.maxTension,
+                    label: "\(Int(hudManager.tension))%",
+                    color: hudManager.tension > 80 ? .red : accentColor,
+                    isDark: false
+                )
+                
+                // Shift Progress Bar
+                ProgressBar(
+                    icon: "clock.fill",
+                    progress: CGFloat(hudManager.dayProgress),
+                    label: "\(Int(hudManager.dayProgress * 100))%",
+                    color: .green,
+                    isDark: false
+                )
+            }
+            .padding(.horizontal, 40)
+            .padding(.top, -4) // Tuck closer to the top bar
+            
+            Spacer()
         }
     }
 }

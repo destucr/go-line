@@ -367,4 +367,57 @@ extension GameScene {
         }
         return sampledPoints
     }
+    
+    func getLinePathPoints(line: MetroLine) -> [CGPoint] {
+        var allPoints: [CGPoint] = []
+        let stationIDs = line.stations
+        guard stationIDs.count >= 2 else { return [] }
+        
+        for i in 0..<stationIDs.count - 1 {
+            guard let p1 = getStationPos(id: stationIDs[i]),
+                  let p2 = getStationPos(id: stationIDs[i+1]) else { continue }
+            
+            let segmentPoints = getStructuredPathPoints(from: p1, to: p2)
+            let sampled = getSampledPointsFromPath(points: segmentPoints)
+            
+            if i == 0 {
+                allPoints.append(contentsOf: sampled)
+            } else {
+                allPoints.append(contentsOf: sampled.dropFirst())
+            }
+        }
+        return allPoints
+    }
+    
+    func getPointAtDistance(points: [CGPoint], distance: CGFloat) -> (point: CGPoint, angle: CGFloat)? {
+        guard points.count >= 2 else { return nil }
+        
+        var remainingDist = distance
+        if distance <= 0 { 
+            let p1 = points[0]
+            let p2 = points[1]
+            let angle = atan2(p2.y - p1.y, p2.x - p1.x)
+            return (p1, angle) 
+        }
+        
+        for i in 0..<points.count - 1 {
+            let p1 = points[i]
+            let p2 = points[i+1]
+            let d = hypot(p2.x - p1.x, p2.y - p1.y)
+            
+            if remainingDist <= d {
+                let t = d > 0 ? remainingDist / d : 0
+                let x = p1.x + (p2.x - p1.x) * t
+                let y = p1.y + (p2.y - p1.y) * t
+                let angle = atan2(p2.y - p1.y, p2.x - p1.x)
+                return (CGPoint(x: x, y: y), angle)
+            }
+            remainingDist -= d
+        }
+        
+        let last = points[points.count - 1]
+        let prev = points[points.count - 2]
+        let angle = atan2(last.y - prev.y, last.x - prev.x)
+        return (last, angle)
+    }
 }

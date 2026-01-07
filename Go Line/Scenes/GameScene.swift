@@ -54,7 +54,7 @@ class GameScene: SKScene {
     
     // MARK: - View Cache
     var stationNodes: [UUID: SKShapeNode] = [:]
-    var trainNodes: [UUID: SKShapeNode] = [:]
+    var trainNodes: [UUID: SKNode] = [:]
     var uiNodes: [String: SKNode] = [:]
     
     // MARK: - Interaction State

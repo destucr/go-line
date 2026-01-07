@@ -32,16 +32,17 @@ class GameViewController: UIViewController {
         let btn = UIButton(type: .system)
         btn.backgroundColor = color
         btn.layer.cornerRadius = 25
-        btn.layer.borderWidth = 3
-        btn.layer.borderColor = UIColor.white.cgColor
-        btn.setTitle("", for: .normal) // Just color orb
+        btn.layer.borderWidth = 4
+        btn.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor
+        btn.setTitle("", for: .normal)
         
-        // Shadow
-        btn.layer.shadowColor = color.cgColor
+        // Shadow for depth
+        btn.layer.shadowColor = UIColor.black.cgColor
         btn.layer.shadowOffset = CGSize(width: 0, height: 4)
-        btn.layer.shadowOpacity = 0.5
-        btn.layer.shadowRadius = 4
+        btn.layer.shadowOpacity = 0.2
+        btn.layer.shadowRadius = 6
         
+        // Glossy effect overlay (optional, but let's keep it clean)
         return btn
     }
     
@@ -79,14 +80,6 @@ class GameViewController: UIViewController {
         
         // Initial SwiftUI HUD
         let hudView = GameHUDView(
-            stitches: 0,
-            day: "Day 1",
-            time: "06:00",
-            thread: 0,
-            tension: 0,
-            maxTension: 100,
-            level: 1,
-            dayProgress: 0,
             onPause: { [weak self] in self?.handlePause() },
             onMenu: { [weak self] in self?.handleMenuTap() }
         )
@@ -100,7 +93,7 @@ class GameViewController: UIViewController {
             hosting.view.topAnchor.constraint(equalTo: view.topAnchor),
             hosting.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             hosting.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            hosting.view.heightAnchor.constraint(equalToConstant: 140)
+            hosting.view.heightAnchor.constraint(equalToConstant: 100)
         ])
         hosting.didMove(toParent: self)
         self.hudHostingController = hosting
@@ -134,7 +127,6 @@ class GameViewController: UIViewController {
         
         gameScene?.onDayComplete = { [weak self] day in
             DispatchQueue.main.async {
-                self?.dayProgress = 0 // Reset for next day
                 self?.showShop(day: day)
             }
         }
@@ -149,6 +141,8 @@ class GameViewController: UIViewController {
         skView.presentScene(gameScene)
         
         // Initial State
+        self.dayProgress = 0
+        updateHUD()
         updateLineButtons(level: 1)
     }
     
@@ -156,7 +150,7 @@ class GameViewController: UIViewController {
         guard let scene = gameScene else { return }
         
         DispatchQueue.main.async {
-            self.hudHostingController?.rootView = GameHUDView(
+            HUDManager.shared.update(
                 stitches: scene.score,
                 day: "Day \(DayCycleManager.shared.currentDay)",
                 time: DayCycleManager.shared.currentTimeString,
@@ -164,9 +158,7 @@ class GameViewController: UIViewController {
                 tension: scene.tension,
                 maxTension: scene.maxTension,
                 level: scene.level,
-                dayProgress: self.dayProgress,
-                onPause: { [weak self] in self?.handlePause() },
-                onMenu: { [weak self] in self?.handleMenuTap() }
+                dayProgress: self.dayProgress
             )
         }
     }

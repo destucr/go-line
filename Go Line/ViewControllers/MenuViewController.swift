@@ -7,47 +7,49 @@ class MenuViewController: UIViewController {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Go Line"
-        label.font = UIFont(name: "ChalkboardSE-Bold", size: 72)
-        label.textColor = .black
+        label.text = "GO LINE"
+        label.font = .systemFont(ofSize: 84, weight: .black)
+        label.textColor = UIColor(red: 0.7, green: 0.72, blue: 0.75, alpha: 1.0)
         label.textAlignment = .center
+        label.letterSpacing = 4.0
         return label
     }()
     
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Stitch the City Together"
-        label.font = UIFont(name: "ChalkboardSE-Regular", size: 24)
-        label.textColor = .gray
+        label.text = "NETWORK OPERATIONS INTERFACE v2.0"
+        label.font = .monospacedSystemFont(ofSize: 14, weight: .bold)
+        label.textColor = .systemOrange
         label.textAlignment = .center
         return label
     }()
     
     private let playButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("PLAY", for: .normal)
-        button.titleLabel?.font = UIFont(name: "ChalkboardSE-Bold", size: 32)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .systemRed
-        button.layer.cornerRadius = 15
+        button.setTitle("INITIALIZE SHIFT", for: .normal)
+        button.titleLabel?.font = .monospacedSystemFont(ofSize: 20, weight: .black)
+        button.setTitleColor(.black, for: .normal)
+        button.backgroundColor = .systemOrange
+        button.layer.cornerRadius = 2
         return button
     }()
     
     private let guideButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("GUIDE", for: .normal)
-        button.titleLabel?.font = UIFont(name: "ChalkboardSE-Bold", size: 24)
-        button.setTitleColor(.darkGray, for: .normal)
-        button.backgroundColor = UIColor(white: 0.9, alpha: 1.0)
-        button.layer.cornerRadius = 15
+        button.setTitle("OPERATIONS GUIDE", for: .normal)
+        button.titleLabel?.font = .monospacedSystemFont(ofSize: 16, weight: .bold)
+        button.setTitleColor(UIColor(white: 0.7, alpha: 1.0), for: .normal)
+        button.backgroundColor = UIColor(white: 0.15, alpha: 1.0)
+        button.layer.borderColor = UIColor(white: 0.3, alpha: 1.0).cgColor
+        button.layer.borderWidth = 1
+        button.layer.cornerRadius = 2
         return button
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "BackgroundColor")
+        view.backgroundColor = UIColor(red: 0.1, green: 0.11, blue: 0.12, alpha: 1.0)
         setupLayout()
-        setupAnimations()
     }
     
     private func setupLayout() {
@@ -58,64 +60,32 @@ class MenuViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -100),
+            titleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -80),
             
-            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
+            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
             subtitleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            playButton.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 40),
+            playButton.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 60),
             playButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            playButton.widthAnchor.constraint(equalToConstant: 200),
-            playButton.heightAnchor.constraint(equalToConstant: 60),
+            playButton.widthAnchor.constraint(equalToConstant: 280),
+            playButton.heightAnchor.constraint(equalToConstant: 54),
             
-            guideButton.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 20),
+            guideButton.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 12),
             guideButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            guideButton.widthAnchor.constraint(equalToConstant: 160),
-            guideButton.heightAnchor.constraint(equalToConstant: 50)
+            guideButton.widthAnchor.constraint(equalToConstant: 280),
+            guideButton.heightAnchor.constraint(equalToConstant: 44)
         ])
         
         playButton.addTarget(self, action: #selector(playTapped), for: .touchUpInside)
         guideButton.addTarget(self, action: #selector(guideTapped), for: .touchUpInside)
     }
     
-    private func setupAnimations() {
-        titleLabel.alpha = 0
-        titleLabel.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
-        
-        playButton.alpha = 0
-        playButton.transform = CGAffineTransform(translationX: 0, y: 50)
-        
-        guideButton.alpha = 0
-        guideButton.transform = CGAffineTransform(translationX: 0, y: 50)
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        UIView.animate(withDuration: 0.8, delay: 0.2, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.5, options: .curveEaseOut) {
-            self.titleLabel.alpha = 1
-            self.titleLabel.transform = .identity
-        }
-        
-        UIView.animate(withDuration: 0.6, delay: 0.5, options: .curveEaseOut) {
-            self.playButton.alpha = 1
-            self.playButton.transform = .identity
-        }
-        
-        UIView.animate(withDuration: 0.6, delay: 0.7, options: .curveEaseOut) {
-            self.guideButton.alpha = 1
-            self.guideButton.transform = .identity
-        }
-    }
-    
     @objc private func playTapped() {
         playSound(named: "soft_click")
-        UIView.animate(withDuration: 0.1, animations: {
-            self.playButton.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+        UIView.animate(withDuration: 0.05, animations: {
+            self.playButton.alpha = 0.7
         }, completion: { _ in
-            UIView.animate(withDuration: 0.1) {
-                self.playButton.transform = .identity
-            }
+            self.playButton.alpha = 1.0
             self.onPlayTapped?()
         })
     }
@@ -125,11 +95,33 @@ class MenuViewController: UIViewController {
         self.onGuideTapped?()
     }
     
-    private func playSound(named name: String) {
-        // Internal sound helper for UI feedback if needed
-    }
+    private func playSound(named name: String) { }
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .landscape
+    }
+}
+
+extension UILabel {
+    var letterSpacing: CGFloat {
+        get {
+            if let currentAttrString = attributedText {
+                var range = NSRange(location: 0, length: currentAttrString.length)
+                if let kern = currentAttrString.attribute(NSAttributedString.Key.kern, at: 0, effectiveRange: &range) as? CGFloat {
+                    return kern
+                }
+            }
+            return 0
+        }
+        set {
+            let attributedString: NSMutableAttributedString
+            if let currentAttrString = attributedText {
+                attributedString = NSMutableAttributedString(attributedString: currentAttrString)
+            } else {
+                attributedString = NSMutableAttributedString(string: text ?? "")
+            }
+            attributedString.addAttribute(NSAttributedString.Key.kern, value: newValue, range: NSRange(location: 0, length: attributedString.length))
+            attributedText = attributedString
+        }
     }
 }

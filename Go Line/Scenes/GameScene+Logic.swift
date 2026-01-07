@@ -47,8 +47,8 @@ extension GameScene {
         
         // Initial Seed: 3 Common Stations (Triangle, Circle, Square)
         // Placed roughly in a triangle in the center
-        let safeInsets: UIEdgeInsets = view?.safeAreaInsets ?? .zero
-        let padding: CGFloat = 100
+        let _: UIEdgeInsets = view?.safeAreaInsets ?? .zero
+        let _: CGFloat = 100
         let w = size.width
         let h = size.height
         
@@ -66,7 +66,7 @@ extension GameScene {
     }
     
     func spawnNewStation() {
-        guard let view = view else { return }
+        guard view != nil else { return }
         
         // 1. Determine Type (Weighted)
         // Common: Circle (40%), Triangle (30%), Square (20%)
