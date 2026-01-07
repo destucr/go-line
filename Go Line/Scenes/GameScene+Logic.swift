@@ -82,39 +82,51 @@ extension GameScene {
             newType = uniques.randomElement() ?? .pentagon
         }
         
-        // 2. Determine Position (Edge of WORLD with padding)
-        let side = Int.random(in: 0...3) // 0: Top, 1: Bottom, 2: Left, 3: Right
-        // Use worldSize
-        let w = worldSize.width > 0 ? worldSize.width : size.width * 2
-        let h = worldSize.height > 0 ? worldSize.height : size.height * 2
-        let padding: CGFloat = 80
+        // 2. Determine Position (Relatively close to center, expanding outwards)
+        // Instead of pure edge, let's spawn in a circle that grows with level
+        let expansionFactors: [CGFloat] = [1.0, 1.2, 1.4, 1.6, 1.8, 2.0]
+        let factor = expansionFactors[min(level - 1, expansionFactors.count - 1)]
         
-        var x: CGFloat = 0
-        var y: CGFloat = 0
+        let centerX = worldSize.width / 2
+        let centerY = worldSize.height / 2
         
-        switch side {
-        case 0: // Top
-            x = CGFloat.random(in: padding...w-padding)
-            y = h - padding
-        case 1: // Bottom
-            x = CGFloat.random(in: padding...w-padding)
-            y = padding
-        case 2: // Left
-            x = padding
-            y = CGFloat.random(in: padding...h-padding)
-        case 3: // Right
-            x = w - padding
-            y = CGFloat.random(in: padding...h-padding)
-        default: break
-        }
+        // Base radius is half of initial screen dimension
+        let baseRadius = min(size.width, size.height) * 0.4
+        let maxRadius = baseRadius * factor
         
-        // Avoid overlapping existing stations
-        let candidate = CGPoint(x: x, y: y)
-        for s in gameStations {
-            if hypot(s.position.x - candidate.x, s.position.y - candidate.y) < 80 {
-                return // Too close, skip spawn
+        var candidate: CGPoint = .zero
+        var validPos = false
+        
+        for _ in 0..<10 {
+            let angle = CGFloat.random(in: 0...(2 * .pi))
+            let dist = CGFloat.random(in: baseRadius...maxRadius)
+            
+            let x = centerX + cos(angle) * dist
+            let y = centerY + sin(angle) * dist
+            
+            // Constrain to world bounds with padding
+            let padding: CGFloat = 60
+            let clampedX = max(padding, min(worldSize.width - padding, x))
+            let clampedY = max(padding, min(worldSize.height - padding, y))
+            
+            candidate = CGPoint(x: clampedX, y: clampedY)
+            
+            // Distance check
+            var tooClose = false
+            for s in gameStations {
+                if hypot(s.position.x - candidate.x, s.position.y - candidate.y) < 100 {
+                    tooClose = true
+                    break
+                }
+            }
+            
+            if !tooClose {
+                validPos = true
+                break
             }
         }
+        
+        guard validPos else { return }
         
         let s = Station(id: UUID(), position: candidate, type: newType)
         gameStations.append(s)
@@ -158,14 +170,22 @@ extension GameScene {
         // Map Expansion
         let expansionFactors: [CGFloat] = [1.0, 1.2, 1.4, 1.6, 1.8, 2.0]
         let factor = expansionFactors[min(level - 1, expansionFactors.count - 1)]
-        worldSize = CGSize(width: size.width * factor, height: size.height * factor)
+        let newWorldSize = CGSize(width: size.width * factor, height: size.height * factor)
+        worldSize = newWorldSize
         
-        // Camera Auto-Zoom (Centered)
+        // Camera Auto-Zoom and Re-center
         let zoom = 1.0 / factor
-        cameraNode.run(SKAction.scale(to: zoom, duration: 1.5))
+        let newCenter = CGPoint(x: newWorldSize.width / 2, y: newWorldSize.height / 2)
+        
+        let zoomAction = SKAction.scale(to: zoom, duration: 1.5)
+        let moveAction = SKAction.move(to: newCenter, duration: 1.5)
+        moveAction.timingMode = .easeInEaseOut
+        zoomAction.timingMode = .easeInEaseOut
+        
+        cameraNode.run(SKAction.group([zoomAction, moveAction]))
         
         let confetti = GraphicsManager.createConfettiEmitter()
-        confetti.position = cameraNode.position // Center on camera
+        confetti.position = newCenter // Center on new world center
         confetti.zPosition = 1001
         addChild(confetti)
         

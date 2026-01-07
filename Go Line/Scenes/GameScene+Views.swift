@@ -7,6 +7,7 @@ extension GameScene {
         node.position = station.position
         node.name = "station_\(station.id)"
         node.zPosition = 10
+        node.fillColor = UIColor(named: "BackgroundColor") ?? .white
         addChild(node)
         
         // Fix: stationNodes is [UUID: SKShapeNode]
@@ -18,18 +19,41 @@ extension GameScene {
         
         // 1. Handle Overcrowding / Tension Pulse
         if station.isOvercrowded {
-            if node.action(forKey: "pulse") == nil {
+            if node.childNode(withName: "overcrowd_ring") == nil {
+                // Outer glowing ring
+                let ring = SKShapeNode(circleOfRadius: stationRadius + 8)
+                ring.name = "overcrowd_ring"
+                ring.strokeColor = .systemRed
+                ring.lineWidth = 3
+                ring.zPosition = -1
+                node.addChild(ring)
+                
                 let pulse = SKAction.sequence([
-                    SKAction.scale(to: 1.2, duration: 0.5),
-                    SKAction.scale(to: 1.0, duration: 0.5)
+                    SKAction.fadeAlpha(to: 0.3, duration: 0.5),
+                    SKAction.fadeAlpha(to: 1.0, duration: 0.5)
                 ])
-                node.run(SKAction.repeatForever(pulse), withKey: "pulse")
-                node.fillColor = .systemRed // Tint red
+                ring.run(SKAction.repeatForever(pulse))
+                
+                // Alert icon
+                let alert = SKLabelNode(text: "!")
+                alert.name = "overcrowd_alert"
+                alert.fontName = "ChalkboardSE-Bold"
+                alert.fontSize = 20
+                alert.fontColor = .systemRed
+                alert.position = CGPoint(x: 0, y: stationRadius + 15)
+                node.addChild(alert)
+                
+                let bounce = SKAction.sequence([
+                    SKAction.moveBy(x: 0, y: 5, duration: 0.3),
+                    SKAction.moveBy(x: 0, y: -5, duration: 0.3)
+                ])
+                alert.run(SKAction.repeatForever(bounce))
             }
         } else {
-            node.removeAction(forKey: "pulse")
+            node.childNode(withName: "overcrowd_ring")?.removeFromParent()
+            node.childNode(withName: "overcrowd_alert")?.removeFromParent()
             node.setScale(1.0)
-            node.fillColor = UIColor(named: "BackgroundColor") ?? .white // Restore white fill
+            node.fillColor = UIColor(named: "BackgroundColor") ?? .white
         }
         
         // 2. Handle passenger dots/icons

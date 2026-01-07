@@ -7,7 +7,6 @@ extension GameScene {
         guard !isGameOver else { return }
         guard let touch = touches.first else { return }
         
-        // World Location for Station Check
         let location = touch.location(in: self)
         
         guard !isGamePaused else { return }
@@ -15,11 +14,8 @@ extension GameScene {
         if let (stationID, stationPos) = getStationAt(location) {
             startDrawingLine(from: stationID, at: stationPos)
         } else {
-            // Camera panning disabled
-            /*
             isPanning = true
             lastTouchPosition = touch.location(in: view)
-            */
         }
     }
     
@@ -27,15 +23,35 @@ extension GameScene {
         guard !isGameOver, let touch = touches.first else { return }
         
         if let startID = startStationID, let startNode = stationNodes[startID] {
-            // Line Drawing
-            // location(in: self) accounts for camera offset automatically
             let location = touch.location(in: self)
             updateDraftLine(from: startNode.position, to: location)
+        } else if isPanning {
+            let currentTouchPosition = touch.location(in: view)
+            let dx = (currentTouchPosition.x - lastTouchPosition.x) * cameraNode.xScale
+            let dy = (currentTouchPosition.y - lastTouchPosition.y) * cameraNode.yScale
+            
+            cameraNode.position = CGPoint(
+                x: cameraNode.position.x - dx,
+                y: cameraNode.position.y + dy
+            )
+            
+            // Constrain camera to world bounds
+            let w = worldSize.width
+            let h = worldSize.height
+            cameraNode.position.x = max(0, min(w, cameraNode.position.x))
+            cameraNode.position.y = max(0, min(h, cameraNode.position.y))
+            
+            lastTouchPosition = currentTouchPosition
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard !isGameOver else { return }
+        
+        if isPanning {
+            isPanning = false
+            return
+        }
         
         guard let touch = touches.first,
               let startID = startStationID else {
@@ -53,6 +69,7 @@ extension GameScene {
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         resetDraft()
+        isPanning = false
     }    
     // MARK: - Interaction Helpers
     func getStationAt(_ location: CGPoint) -> (UUID, CGPoint)? {

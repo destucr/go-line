@@ -61,6 +61,8 @@ class GameScene: SKScene {
     var currentDraftLine: SKShapeNode?
     var startStationID: UUID?
     var currentLineColor: UIColor = .systemRed
+    var isPanning: Bool = false
+    var lastTouchPosition: CGPoint = .zero
 
     // MARK: - Camera & World
     let cameraNode = SKCameraNode()
@@ -80,7 +82,7 @@ class GameScene: SKScene {
         // Setup Camera
         addChild(cameraNode)
         camera = cameraNode
-        cameraNode.position = CGPoint(x: size.width/2, y: size.height/2)
+        cameraNode.position = CGPoint(x: worldSize.width/2, y: worldSize.height/2)
         
         isUserInteractionEnabled = true
         
