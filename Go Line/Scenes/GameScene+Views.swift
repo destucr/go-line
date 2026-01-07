@@ -82,6 +82,17 @@ extension GameScene {
         }
     }
     
+    private struct TrainRenderContext {
+        let train: Train
+        let line: MetroLine
+        let headDist: CGFloat
+        let pathPoints: [CGPoint]
+        let stationDistances: [CGFloat]
+        let carriageWidth: CGFloat
+        let spacing: CGFloat
+        let offsetPerCarriage: CGFloat
+    }
+
     func updateTrainVisuals() {
         let currentTrainIDs = Set(trains.map { $0.id })
         for (id, node) in trainNodes where !currentTrainIDs.contains(id) {
@@ -147,71 +158,85 @@ extension GameScene {
             let spacing: CGFloat = 4.0
             let offsetPerCarriage = carriageWidth + spacing
             
-            let totalCarriages = 1 + train.carriages
+            let context = TrainRenderContext(
+                train: train,
+                line: line,
+                headDist: headDist,
+                pathPoints: pathPoints,
+                stationDistances: stationDistances,
+                carriageWidth: carriageWidth,
+                spacing: spacing,
+                offsetPerCarriage: offsetPerCarriage
+            )
             
+            let totalCarriages = 1 + train.carriages
             for i in 0..<totalCarriages {
-                let distOffset = CGFloat(i) * offsetPerCarriage
-                let targetDist = train.isReversed ? (headDist + distOffset) : (headDist - distOffset)
-                
-                guard let state = getPointAtDistance(points: pathPoints, distance: targetDist) else { continue }
-                
-                // Connector (except for the first carriage)
-                if i > 0 {
-                    let connectorOffset = distOffset - (carriageWidth / 2 + spacing / 2)
-                    let connectorDist = train.isReversed ? (headDist + connectorOffset) : (headDist - connectorOffset)
-                    if let cState = getPointAtDistance(points: pathPoints, distance: connectorDist) {
-                        let connector = SKShapeNode(rectOf: CGSize(width: spacing + 2, height: 4), cornerRadius: 1)
-                        connector.fillColor = .darkGray
-                        connector.strokeColor = .clear
-                        connector.position = cState.point
-                        connector.zRotation = train.isReversed ? cState.angle + .pi : cState.angle
-                        connector.zPosition = -1
-                        
-                        // Animate connector alpha
-                        var cAlpha: CGFloat = 1.0
-                        for sDist in stationDistances {
-                            let d = abs(connectorDist - sDist)
-                            if d < 20 { cAlpha = max(0, (d - 5) / 15) }
-                        }
-                        connector.alpha = cAlpha
-                        
-                        node?.addChild(connector)
-                    }
-                }
-                
-                let cNode = GraphicsManager.createTrainShape(color: line.color)
-                cNode.position = state.point
-                cNode.zRotation = train.isReversed ? state.angle + .pi : state.angle
-                
-                // Animate carriage alpha based on distance to any station center
-                var carriageAlpha: CGFloat = 1.0
-                for sDist in stationDistances {
-                    let d = abs(targetDist - sDist)
-                    if d < 20 {
-                        // Fully hidden when within 5px of center, fades out over the 15px leading to it
-                        carriageAlpha = min(carriageAlpha, max(0, (d - 5) / 15))
-                    }
-                }
-                cNode.alpha = carriageAlpha
-                
-                node?.addChild(cNode)
-                
-                // Passengers indicators inside carriages
-                let startIdx = i * 6
-                let endIdx = min(startIdx + 6, train.passengers.count)
-                if startIdx < train.passengers.count {
-                    let carriagePassengers = Array(train.passengers[startIdx..<endIdx])
-                    let pSpacing: CGFloat = 4.0
-                    for localIdx in 0..<carriagePassengers.count {
-                        let passenger = carriagePassengers[localIdx]
-                        let pShape = GraphicsManager.createStationShape(type: passenger.destinationType, radius: 2.5, lineWidth: 1.0)
-                        pShape.position = CGPoint(x: CGFloat(localIdx) * pSpacing - 10, y: -2)
-                        cNode.addChild(pShape)
-                    }
-                }
+                renderCarriage(index: i, context: context, node: node)
             }
             
             node?.alpha = 1.0
+        }
+    }
+
+    private func renderCarriage(index: Int, context: TrainRenderContext, node: SKNode?) {
+        let distOffset = CGFloat(index) * context.offsetPerCarriage
+        let targetDist = context.train.isReversed ? (context.headDist + distOffset) : (context.headDist - distOffset)
+        
+        guard let state = getPointAtDistance(points: context.pathPoints, distance: targetDist) else { return }
+        
+        // Connector (except for the first carriage)
+        if index > 0 {
+            let connectorOffset = distOffset - (context.carriageWidth / 2 + context.spacing / 2)
+            let connectorDist = context.train.isReversed ? (context.headDist + connectorOffset) : (context.headDist - connectorOffset)
+            if let cState = getPointAtDistance(points: context.pathPoints, distance: connectorDist) {
+                let connector = SKShapeNode(rectOf: CGSize(width: context.spacing + 2, height: 4), cornerRadius: 1)
+                connector.fillColor = .darkGray
+                connector.strokeColor = .clear
+                connector.position = cState.point
+                connector.zRotation = context.train.isReversed ? cState.angle + .pi : cState.angle
+                connector.zPosition = -1
+                
+                // Animate connector alpha
+                var cAlpha: CGFloat = 1.0
+                for sDist in context.stationDistances {
+                    let d = abs(connectorDist - sDist)
+                    if d < 20 { cAlpha = max(0, (d - 5) / 15) }
+                }
+                connector.alpha = cAlpha
+                
+                node?.addChild(connector)
+            }
+        }
+        
+        let cNode = GraphicsManager.createTrainShape(color: context.line.color)
+        cNode.position = state.point
+        cNode.zRotation = context.train.isReversed ? state.angle + .pi : state.angle
+        
+        // Animate carriage alpha based on distance to any station center
+        var carriageAlpha: CGFloat = 1.0
+        for sDist in context.stationDistances {
+            let d = abs(targetDist - sDist)
+            if d < 20 {
+                // Fully hidden when within 5px of center, fades out over the 15px leading to it
+                carriageAlpha = min(carriageAlpha, max(0, (d - 5) / 15))
+            }
+        }
+        cNode.alpha = carriageAlpha
+        
+        node?.addChild(cNode)
+        
+        // Passengers indicators inside carriages
+        let startIdx = index * 6
+        let endIdx = min(startIdx + 6, context.train.passengers.count)
+        if startIdx < context.train.passengers.count {
+            let carriagePassengers = Array(context.train.passengers[startIdx..<endIdx])
+            let pSpacing: CGFloat = 4.0
+            for localIdx in 0..<carriagePassengers.count {
+                let passenger = carriagePassengers[localIdx]
+                let pShape = GraphicsManager.createStationShape(type: passenger.destinationType, radius: 2.5, lineWidth: 1.0)
+                pShape.position = CGPoint(x: CGFloat(localIdx) * pSpacing - 10, y: -2)
+                cNode.addChild(pShape)
+            }
         }
     }
 

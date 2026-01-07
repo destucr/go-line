@@ -89,7 +89,11 @@ struct ShopView: View {
                             cost: UpgradeManager.shared.getCarriageCost(),
                             isAffordable: totalThread >= UpgradeManager.shared.getCarriageCost()
                         ) {
-                            if UpgradeManager.shared.buyCarriage() { syncState() }
+                            SoundManager.shared.playSound("soft_click")
+                            if UpgradeManager.shared.buyCarriage() {
+                                SoundManager.shared.playSound("sfx_levelup")
+                                syncState()
+                            }
                         }
                         
                         UpgradeCard(
@@ -100,7 +104,11 @@ struct ShopView: View {
                             cost: UpgradeManager.shared.getSpeedCost(),
                             isAffordable: totalThread >= UpgradeManager.shared.getSpeedCost()
                         ) {
-                            if UpgradeManager.shared.buySpeed() { syncState() }
+                            SoundManager.shared.playSound("soft_click")
+                            if UpgradeManager.shared.buySpeed() {
+                                SoundManager.shared.playSound("sfx_levelup")
+                                syncState()
+                            }
                         }
                         
                         UpgradeCard(
@@ -111,7 +119,11 @@ struct ShopView: View {
                             cost: UpgradeManager.shared.getStrengthCost(),
                             isAffordable: totalThread >= UpgradeManager.shared.getStrengthCost()
                         ) {
-                            if UpgradeManager.shared.buyStrength() { syncState() }
+                            SoundManager.shared.playSound("soft_click")
+                            if UpgradeManager.shared.buyStrength() {
+                                SoundManager.shared.playSound("sfx_levelup")
+                                syncState()
+                            }
                         }
                     }
                     .padding(.horizontal, 30)
@@ -120,7 +132,10 @@ struct ShopView: View {
                 Spacer()
                 
                 // Footer Action
-                Button(action: onStartNextDay) {
+                Button(action: {
+                    SoundManager.shared.playSound("soft_click")
+                    onStartNextDay()
+                }, label: {
                     HStack {
                         Text("INITIALIZE SHIFT \(day + 1)")
                         Image(systemName: "arrow.right")
@@ -130,7 +145,7 @@ struct ShopView: View {
                     .padding(.horizontal, 60)
                     .padding(.vertical, 14)
                     .background(Capsule().fill(accentColor))
-                }
+                })
                 .padding(.bottom, 20)
             }
         }

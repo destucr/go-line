@@ -17,7 +17,7 @@ class HUDManager: ObservableObject {
     static let shared = HUDManager()
     
     @Published var stitches: Int = 0
-    @Published var day: String = "Day 1"
+    @Published var day: String = "1"
     @Published var time: String = "06:00"
     @Published var thread: Int = 0
     @Published var tension: CGFloat = 0.0
@@ -42,7 +42,7 @@ class HUDManager: ObservableObject {
     
     func reset() {
         stitches = 0
-        day = "Day 1"
+        day = "1"
         time = "06:00"
         thread = 0
         tension = 0

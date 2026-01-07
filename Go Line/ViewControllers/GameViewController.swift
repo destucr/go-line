@@ -151,7 +151,7 @@ class GameViewController: UIViewController {
         DispatchQueue.main.async {
             let state = HUDState(
                 stitches: scene.score,
-                day: "Day \(DayCycleManager.shared.currentDay)",
+                day: "\(DayCycleManager.shared.currentDay)",
                 time: DayCycleManager.shared.currentTimeString,
                 thread: CurrencyManager.shared.totalThread,
                 tension: scene.tension,
