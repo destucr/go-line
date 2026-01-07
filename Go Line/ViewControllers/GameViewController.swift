@@ -2,36 +2,16 @@ import UIKit
 import SwiftUI
 internal import SpriteKit
 
-// Custom Hosting Controller to allow touch pass-through
-class PassThroughHostingController<Content: View>: UIHostingController<Content> {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .clear
-    }
-    
-    override func loadView() {
-        super.loadView()
-        view = PassThroughView()
-    }
-}
-
-class PassThroughView: UIView {
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        let view = super.hitTest(point, with: event)
-        // If the view hit is the hosting view itself (and not a button inside it), return nil to pass through
-        return view == self ? nil : view
-    }
-}
-
 class GameViewController: UIViewController {
     
     // SwiftUI Hosting
-    private var hudHostingController: PassThroughHostingController<GameHUDView>?
+    private var hudHostingController: UIHostingController<GameHUDView>?
     
     var onExitTapped: (() -> Void)?
     
     private var skView: SKView!
     private var gameScene: GameScene?
+    private var dayProgress: Float = 0.0
     
     // HUD Elements
     private let lineSelectionStack: UIStackView = {
@@ -67,7 +47,7 @@ class GameViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor(named: "BackgroundColor")
         setupSKView()
         setupHUD() // This will now be an empty method, but called for consistency
         setupLineSelection()
@@ -106,11 +86,12 @@ class GameViewController: UIViewController {
             tension: 0,
             maxTension: 100,
             level: 1,
+            dayProgress: 0,
             onPause: { [weak self] in self?.handlePause() },
             onMenu: { [weak self] in self?.handleMenuTap() }
         )
         
-        let hosting = PassThroughHostingController(rootView: hudView)
+        let hosting = UIHostingController(rootView: hudView)
         hosting.view.backgroundColor = .clear
         addChild(hosting)
         view.addSubview(hosting.view)
@@ -119,7 +100,7 @@ class GameViewController: UIViewController {
             hosting.view.topAnchor.constraint(equalTo: view.topAnchor),
             hosting.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             hosting.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            hosting.view.heightAnchor.constraint(equalToConstant: 140) // Slightly taller to accommodate content reliably
+            hosting.view.heightAnchor.constraint(equalToConstant: 140)
         ])
         hosting.didMove(toParent: self)
         self.hudHostingController = hosting
@@ -134,24 +115,26 @@ class GameViewController: UIViewController {
             self?.showGameOverOverlay(score: finalScore, reason: reason)
         }
         
-        gameScene?.onScoreUpdate = { [weak self] stitches in
+        gameScene?.onScoreUpdate = { [weak self] _ in
             self?.updateHUD()
         }
         
-        gameScene?.onTimeUpdate = { [weak self] day, time in
+        gameScene?.onTimeUpdate = { [weak self] _, _, progress in
+            self?.dayProgress = progress
             self?.updateHUD()
         }
         
-        CurrencyManager.shared.onThreadUpdate = { [weak self] amount in
+        CurrencyManager.shared.onThreadUpdate = { [weak self] _ in
             self?.updateHUD()
         }
         
-        gameScene?.onTensionUpdate = { [weak self] tension in
+        gameScene?.onTensionUpdate = { [weak self] _ in
             self?.updateHUD()
         }
         
         gameScene?.onDayComplete = { [weak self] day in
             DispatchQueue.main.async {
+                self?.dayProgress = 0 // Reset for next day
                 self?.showShop(day: day)
             }
         }
@@ -176,11 +159,12 @@ class GameViewController: UIViewController {
             self.hudHostingController?.rootView = GameHUDView(
                 stitches: scene.score,
                 day: "Day \(DayCycleManager.shared.currentDay)",
-                time: DayCycleManager.shared.currentTimeString, // Need to add this helper to manager or use custom logic
+                time: DayCycleManager.shared.currentTimeString,
                 thread: CurrencyManager.shared.totalThread,
                 tension: scene.tension,
                 maxTension: scene.maxTension,
                 level: scene.level,
+                dayProgress: self.dayProgress,
                 onPause: { [weak self] in self?.handlePause() },
                 onMenu: { [weak self] in self?.handleMenuTap() }
             )
@@ -189,22 +173,27 @@ class GameViewController: UIViewController {
     
     private func updateLineButtons(level: Int) {
         // Red always unlocked
+        redButton.isHidden = false
         redButton.alpha = 1.0
         redButton.isEnabled = true
         
         // Blue unlocks at level 2
+        blueButton.isHidden = level < 2
         blueButton.alpha = level >= 2 ? 1.0 : 0.3
         blueButton.isEnabled = level >= 2
         
         // Green unlocks at level 3
+        greenButton.isHidden = level < 3
         greenButton.alpha = level >= 3 ? 1.0 : 0.3
         greenButton.isEnabled = level >= 3
         
         // Orange unlocks at level 4
+        orangeButton.isHidden = level < 4
         orangeButton.alpha = level >= 4 ? 1.0 : 0.3
         orangeButton.isEnabled = level >= 4
         
         // Purple unlocks at level 5
+        purpleButton.isHidden = level < 5
         purpleButton.alpha = level >= 5 ? 1.0 : 0.3
         purpleButton.isEnabled = level >= 5
         

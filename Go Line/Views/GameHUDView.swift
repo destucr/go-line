@@ -10,33 +10,31 @@ struct GameHUDView: View {
     var tension: CGFloat
     var maxTension: CGFloat
     var level: Int
+    var dayProgress: Float
     
     var onPause: () -> Void
     var onMenu: () -> Void
     
     var body: some View {
         ZStack(alignment: .top) {
-            // Background to visualize safe area (optional, keep clear for game)
-            Color.clear.frame(height: 100)
-
             HStack(alignment: .top) {
                 // Left Side: Buttons
                 HStack(spacing: 20) {
                     Button(action: onPause) {
                         Image(systemName: "pause.circle.fill")
                             .font(.system(size: 36))
-                            .foregroundColor(.indigo)
+                            .foregroundColor(Color(white: 0.3)) // Charcoal gray
                             .padding(5)
+                            .contentShape(Rectangle())
                     }
-                    .contentShape(Rectangle())
                     
                     Button(action: onMenu) {
                         Image(systemName: "line.3.horizontal.circle.fill")
                             .font(.system(size: 36))
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color(white: 0.5))
                             .padding(5)
+                            .contentShape(Rectangle())
                     }
-                    .contentShape(Rectangle())
                 }
                 .padding(.leading, 20)
                 
@@ -46,11 +44,11 @@ struct GameHUDView: View {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("STITCHES: \(stitches)")
                         .font(.custom("ChalkboardSE-Bold", size: 22))
-                        .foregroundColor(.indigo)
+                        .foregroundColor(Color(white: 0.2)) // Deep charcoal
                     
-                    Text("\(day) - \(time)")
+                    Text("\(day) - \(time) (LVL \(level))")
                         .font(.custom("ChalkboardSE-Bold", size: 16))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color(white: 0.4))
                     
                     Text("THREAD: \(thread)")
                         .font(.custom("ChalkboardSE-Bold", size: 16))
@@ -61,8 +59,13 @@ struct GameHUDView: View {
             .padding(.top, 10)
             
             VStack(spacing: 0) {
+                // Day Cycle Progress (How level ends)
+                ProgressView(value: min(1.0, Double(dayProgress)))
+                    .progressViewStyle(LinearProgressViewStyle(tint: .green))
+                    .frame(height: 3)
+
                 ProgressView(value: min(1.0, Double(stitches) / 150.0))
-                    .progressViewStyle(LinearProgressViewStyle(tint: .indigo))
+                    .progressViewStyle(LinearProgressViewStyle(tint: Color(white: 0.3)))
                     .frame(height: 3)
                 
                 ProgressView(value: min(1.0, Double(tension) / Double(maxTension)))

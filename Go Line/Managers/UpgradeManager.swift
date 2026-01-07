@@ -17,6 +17,9 @@ class UpgradeManager {
         return Double(strengthLevel) * 25.0 // +25 Tension per level
     }
     
+    // Callbacks
+    var onUpgradePurchased: (() -> Void)?
+    
     private init() {}
     
     func reset() {
@@ -30,6 +33,7 @@ class UpgradeManager {
         let cost = 100 + (carriageCount * 50)
         if CurrencyManager.shared.spendThread(cost) {
             carriageCount += 1
+            onUpgradePurchased?()
             return true
         }
         return false
@@ -39,6 +43,7 @@ class UpgradeManager {
         let cost = 150 + (speedLevel * 75)
         if CurrencyManager.shared.spendThread(cost) {
             speedLevel += 1
+            onUpgradePurchased?()
             return true
         }
         return false
@@ -48,6 +53,7 @@ class UpgradeManager {
         let cost = 200 + (strengthLevel * 100)
         if CurrencyManager.shared.spendThread(cost) {
             strengthLevel += 1
+            onUpgradePurchased?()
             return true
         }
         return false

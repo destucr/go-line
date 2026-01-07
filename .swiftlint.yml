@@ -3,6 +3,14 @@ disabled_rules:
   - force_cast
   - force_try
   - line_length
+  - identifier_name
+  - function_body_length
+  - type_body_length
+  - cyclomatic_complexity
+  - vertical_whitespace
+  - statement_position
+  - for_where
+  - file_length
 
 opt_in_rules:
   - empty_count

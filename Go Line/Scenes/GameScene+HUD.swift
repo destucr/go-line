@@ -36,11 +36,22 @@ extension GameScene {
     }
     
     func showLevelUpPopup() {
-        let container = SKShapeNode(rectOf: CGSize(width: 300, height: 100), cornerRadius: 20)
-        container.fillColor = .white
-        container.strokeColor = .systemBlue
+        let container = SKShapeNode(rectOf: CGSize(width: 400, height: 120), cornerRadius: 20)
+        container.fillColor = UIColor(named: "BackgroundColor") ?? .white
+        
+        var unlockedColorName = ""
+        var strokeColor: UIColor = .systemBlue
+        
+        switch level {
+        case 2: unlockedColorName = "BLUE"; strokeColor = .systemBlue
+        case 3: unlockedColorName = "GREEN"; strokeColor = .systemGreen
+        case 4: unlockedColorName = "ORANGE"; strokeColor = .systemOrange
+        case 5: unlockedColorName = "PURPLE"; strokeColor = .systemPurple
+        default: unlockedColorName = "NEW GOALS"; strokeColor = .black
+        }
+        
+        container.strokeColor = strokeColor
         container.lineWidth = 4
-        // Relative to camera center
         container.position = CGPoint(x: 0, y: -20)
         container.zPosition = 1000
         container.alpha = 0
@@ -51,17 +62,24 @@ extension GameScene {
             addChild(container)
         }
         
-        let label = SKLabelNode(text: "PATTERN \(level) UNLOCKED")
-        label.fontName = "ChalkboardSE-Bold"
-        label.fontSize = 28
-        label.fontColor = .systemBlue
-        label.verticalAlignmentMode = .center
-        container.addChild(label)
+        let titleLabel = SKLabelNode(text: "LEVEL \(level) REACHED")
+        titleLabel.fontName = "ChalkboardSE-Bold"
+        titleLabel.fontSize = 24
+        titleLabel.fontColor = .darkGray
+        titleLabel.position = CGPoint(x: 0, y: 15)
+        container.addChild(titleLabel)
+        
+        let subLabel = SKLabelNode(text: level <= 5 ? "\(unlockedColorName) LINE UNLOCKED" : "GOALS INCREASED")
+        subLabel.fontName = "ChalkboardSE-Bold"
+        subLabel.fontSize = 28
+        subLabel.fontColor = strokeColor
+        subLabel.position = CGPoint(x: 0, y: -25)
+        container.addChild(subLabel)
         
         let sequence = SKAction.sequence([
             SKAction.fadeIn(withDuration: 0.3),
-            SKAction.wait(forDuration: 2.0),
-            SKAction.fadeOut(withDuration: 0.3),
+            SKAction.wait(forDuration: 3.0),
+            SKAction.fadeOut(withDuration: 0.5),
             SKAction.removeFromParent()
         ])
         container.run(sequence)

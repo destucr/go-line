@@ -29,7 +29,7 @@ extension GameScene {
         } else {
             node.removeAction(forKey: "pulse")
             node.setScale(1.0)
-            node.fillColor = .white // Restore white fill
+            node.fillColor = UIColor(named: "BackgroundColor") ?? .white // Restore white fill
         }
         
         // 2. Handle passenger dots/icons
@@ -71,9 +71,8 @@ extension GameScene {
         for train in trains {
             var node = trainNodes[train.id]
             if node == nil {
-                // Fix: remove unused 'line' variable
                 guard metroLines.values.contains(where: { $0.id == train.lineID }) else { continue }
-                node = GraphicsManager.createTrainShape(color: .black)
+                node = SKShapeNode() // Use a container for multi-carriages
                 node?.zPosition = 20
                 addChild(node!)
                 trainNodes[train.id] = node
@@ -81,20 +80,45 @@ extension GameScene {
             
             node?.position = train.position
             node?.zRotation = train.rotation
-            
-            // Update passenger dots inside train
             node?.removeAllChildren()
-            let pSpacing: CGFloat = 5.0
-            // Fix: use _ for unused 'passenger' in loop
-            for (index, _) in train.passengers.enumerated() {
-                let pNode = SKShapeNode(circleOfRadius: 2)
-                pNode.fillColor = .white
-                pNode.strokeColor = .clear
-                pNode.position = CGPoint(x: CGFloat(index) * pSpacing - 8, y: 0)
-                node?.addChild(pNode)
+            
+            let carriageWidth: CGFloat = 24
+            let carriageHeight: CGFloat = 12
+            let spacing: CGFloat = 4.0
+            let totalCarriages = 1 + train.carriages
+            
+            // Draw Carriages
+            for i in 0..<totalCarriages {
+                let rect = CGRect(x: -carriageWidth/2, y: -carriageHeight/2, width: carriageWidth, height: carriageHeight)
+                let cNode = SKShapeNode(rect: rect, cornerRadius: 4)
+                cNode.fillColor = .black
+                cNode.strokeColor = UIColor(white: 0.3, alpha: 1.0)
+                cNode.lineWidth = 1
+                
+                // Position carriage (stacking behind)
+                cNode.position = CGPoint(x: -CGFloat(i) * (carriageWidth + spacing), y: 0)
+                node?.addChild(cNode)
+                
+                // Draw passengers for THIS carriage
+                let startIdx = i * 6
+                let endIdx = min(startIdx + 6, train.passengers.count)
+                
+                if startIdx < train.passengers.count {
+                    let carriagePassengers = train.passengers[startIdx..<endIdx]
+                    let pSpacing: CGFloat = 3.5
+                    for pIdx in carriagePassengers.indices {
+                        let pNode = SKShapeNode(circleOfRadius: 1.5)
+                        pNode.fillColor = .white
+                        pNode.strokeColor = .clear
+                        pNode.position = CGPoint(
+                            x: -CGFloat(i) * (carriageWidth + spacing) + CGFloat(pIdx) * pSpacing - 8,
+                            y: 0
+                        )
+                        node?.addChild(pNode)
+                    }
+                }
             }
             
-            // Disappear if waiting at station (if user requested that earlier)
             node?.alpha = train.isWaiting ? 0.0 : 1.0
         }
     }

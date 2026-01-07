@@ -58,7 +58,7 @@ struct ConfirmationPopupView: View {
             }
             .padding(.vertical, 40)
             .padding(.horizontal, 30)
-            .background(Color.white)
+            .background(Color("BackgroundColor"))
             .cornerRadius(25)
             .shadow(radius: 20)
             .frame(maxWidth: 400)

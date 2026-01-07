@@ -7,7 +7,7 @@ class GameScene: SKScene {
     var onGameOver: ((Int, String) -> Void)?
     var onScoreUpdate: ((Int) -> Void)?
     var onLevelUpdate: ((Int) -> Void)?
-    var onTimeUpdate: ((String, String) -> Void)? // Day, Time
+    var onTimeUpdate: ((String, String, Float) -> Void)? // Day, Time, Progress
     var onTensionUpdate: ((CGFloat) -> Void)?
     var onDayComplete: ((Int) -> Void)?
     
@@ -74,7 +74,7 @@ class GameScene: SKScene {
     
     // MARK: - Lifecycle
     override func didMove(to view: SKView) {
-        backgroundColor = .white
+        backgroundColor = UIColor(named: "BackgroundColor") ?? .white
         worldSize = size
         
         // Setup Camera
@@ -84,9 +84,16 @@ class GameScene: SKScene {
         
         isUserInteractionEnabled = true
         
+        // Listen for Upgrades
+        UpgradeManager.shared.onUpgradePurchased = { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateAllStationsCapacity()
+            }
+        }
+        
         // Setup Day Cycle
         DayCycleManager.shared.onTimeUpdate = { [weak self] timeStr, progress in
-            self?.onTimeUpdate?("Day \(DayCycleManager.shared.currentDay)", timeStr)
+            self?.onTimeUpdate?("Day \(DayCycleManager.shared.currentDay)", timeStr, progress)
         }
         
         DayCycleManager.shared.onDayEnd = { [weak self] day in
@@ -121,6 +128,8 @@ class GameScene: SKScene {
     
     func handleDayEnd(day: Int) {
         isGamePaused = true
+        level += 1
+        handleLevelUp()
         onDayComplete?(day)
     }
     

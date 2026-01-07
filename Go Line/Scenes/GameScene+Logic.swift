@@ -187,6 +187,7 @@ extension GameScene {
     func updateLockedLines() {
         if let blueBtn = uiNodes["line_blue"] {
             let isUnlocked = level >= 2
+            blueBtn.isHidden = !isUnlocked
             blueBtn.alpha = isUnlocked ? 1.0 : 0.3
             if !isUnlocked {
                 blueBtn.setScale(0.8)
@@ -202,6 +203,7 @@ extension GameScene {
         
         if let greenBtn = uiNodes["line_green"] {
             let isUnlocked = level >= 3
+            greenBtn.isHidden = !isUnlocked
             greenBtn.alpha = isUnlocked ? 1.0 : 0.3
             greenBtn.setScale(isUnlocked ? 1.0 : 0.8)
             
@@ -213,6 +215,7 @@ extension GameScene {
         
         if let orangeBtn = uiNodes["line_orange"] {
             let isUnlocked = level >= 4
+            orangeBtn.isHidden = !isUnlocked
             orangeBtn.alpha = isUnlocked ? 1.0 : 0.3
             orangeBtn.setScale(isUnlocked ? 1.0 : 0.8)
             
@@ -224,6 +227,7 @@ extension GameScene {
         
         if let purpleBtn = uiNodes["line_purple"] {
             let isUnlocked = level >= 5
+            purpleBtn.isHidden = !isUnlocked
             purpleBtn.alpha = isUnlocked ? 1.0 : 0.3
             purpleBtn.setScale(isUnlocked ? 1.0 : 0.8)
             
@@ -278,13 +282,19 @@ extension GameScene {
         let stationIndex = Int.random(in: 0..<gameStations.count)
         var station = gameStations[stationIndex]
         
-        var destType = StationType.allCases.randomElement()!
-        let existingTypes = Set(gameStations.map { $0.type })
+        // Get all available station types currently on the map
+        let existingTypes = Array(Set(gameStations.map { $0.type }))
         
-        var attempts = 0
-        while (destType == station.type || !existingTypes.contains(destType)) && attempts < 10 {
-            destType = StationType.allCases.randomElement()!
-            attempts += 1
+        // Filter out the current station's type to ensure they have somewhere to go
+        let validDestinations = existingTypes.filter { $0 != station.type }
+        
+        // If no other station types exist (e.g. only Circles on map), pick any other type
+        // This edge case shouldn't happen often if we spawn diverse stations, 
+        // but as a fallback we can pick a random type or just return to avoid ghost passengers.
+        guard let destType = validDestinations.randomElement() else {
+             // Fallback: if only one type of station exists, maybe just don't spawn? 
+             // Or spawn for a future station? Let's skip spawning to avoid overcrowding with un-movable passengers.
+             return 
         }
         
         let passenger = Passenger(id: UUID(), destinationType: destType, spawnTime: lastUpdateTime)
@@ -345,7 +355,7 @@ extension GameScene {
             if train.progress >= 1.0 {
                 train.progress = 0.0
                 train.currentSegmentIndex = toIndex
-                handleStationArrival(trainIndex: i, stationID: toID)
+                handleStationArrival(train: &train, stationID: toID)
                 
                 // Center at station and trigger Wait/Pause
                 train.position = toPos
@@ -367,8 +377,7 @@ extension GameScene {
         }
     }
     
-    func handleStationArrival(trainIndex: Int, stationID: UUID) {
-        var train = trains[trainIndex]
+    func handleStationArrival(train: inout Train, stationID: UUID) {
         guard let stationIndex = gameStations.firstIndex(where: { $0.id == stationID }) else { return }
         var station = gameStations[stationIndex]
         
@@ -377,6 +386,8 @@ extension GameScene {
         if offboardCount > 0 {
             let earningPerPassenger = 10
             let earnings = offboardCount * earningPerPassenger
+            
+            print("Offboarded \(offboardCount) passengers at \(station.type). Earnings: \(earnings)")
             
             // Update Progression
             score += offboardCount
@@ -388,6 +399,8 @@ extension GameScene {
             // Visual Feedback
             showScorePopup(amount: offboardCount, earnings: earnings, at: station.position)
             run(SKAction.playSoundFileNamed("sfx_score.wav", waitForCompletion: false))
+        } else {
+            // print("Train arrived at \(station.type) but no passengers offboarded.")
         }
         
         // Onboard passengers
@@ -401,7 +414,6 @@ extension GameScene {
             }
         }
         
-        trains[trainIndex] = train
         gameStations[stationIndex] = station
     }
     

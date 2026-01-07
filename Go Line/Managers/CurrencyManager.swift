@@ -3,7 +3,12 @@ import Foundation
 class CurrencyManager {
     static let shared = CurrencyManager()
     
-    private(set) var totalThread: Int = 0
+    private var _totalThread: Int = 0
+    private let queue = DispatchQueue(label: "CurrencyManager.queue")
+    
+    var totalThread: Int {
+        return queue.sync { _totalThread }
+    }
     
     // Callbacks
     var onThreadUpdate: ((Int) -> Void)?
@@ -11,19 +16,33 @@ class CurrencyManager {
     private init() {}
     
     func addThread(_ amount: Int) {
-        totalThread += amount
-        onThreadUpdate?(totalThread)
+        queue.async {
+            self._totalThread += amount
+            let newTotal = self._totalThread
+            DispatchQueue.main.async {
+                self.onThreadUpdate?(newTotal)
+            }
+        }
     }
     
     func spendThread(_ amount: Int) -> Bool {
-        guard totalThread >= amount else { return false }
-        totalThread -= amount
-        onThreadUpdate?(totalThread)
-        return true
+        return queue.sync {
+            guard _totalThread >= amount else { return false }
+            _totalThread -= amount
+            let newTotal = _totalThread
+            DispatchQueue.main.async {
+                self.onThreadUpdate?(newTotal)
+            }
+            return true
+        }
     }
     
     func reset() {
-        totalThread = 0
-        onThreadUpdate?(0)
+        queue.async {
+            self._totalThread = 0
+            DispatchQueue.main.async {
+                self.onThreadUpdate?(0)
+            }
+        }
     }
 }

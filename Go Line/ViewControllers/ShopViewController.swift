@@ -59,7 +59,7 @@ class ShopViewController: UIViewController {
             
             stackView.topAnchor.constraint(equalTo: threadLabel.bottomAnchor, constant: 40),
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stackView.widthAnchor.constraint(equalToConstant: 400),
+            stackView.widthAnchor.constraint(equalToConstant: 400)
         ])
         
         createUpgradeButtons()
@@ -143,11 +143,11 @@ class ShopViewController: UIViewController {
             // Subtle animation
             UIView.animate(withDuration: 0.1, animations: {
                 sender.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
-            }) { _ in
+            }, completion: { _ in
                 UIView.animate(withDuration: 0.1) {
                     sender.transform = .identity
                 }
-            }
+            })
         } else {
             playSound("sfx_click_cancel")
             // Shake animation

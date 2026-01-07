@@ -45,7 +45,7 @@ class MenuViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor(named: "BackgroundColor")
         setupLayout()
         setupAnimations()
     }
@@ -112,12 +112,12 @@ class MenuViewController: UIViewController {
         playSound(named: "soft_click")
         UIView.animate(withDuration: 0.1, animations: {
             self.playButton.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
-        }) { _ in
+        }, completion: { _ in
             UIView.animate(withDuration: 0.1) {
                 self.playButton.transform = .identity
             }
             self.onPlayTapped?()
-        }
+        })
     }
     
     @objc private func guideTapped() {

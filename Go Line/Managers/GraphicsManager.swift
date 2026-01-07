@@ -34,7 +34,7 @@ class GraphicsManager {
     // MARK: - Shape Generators
     
     static func createBackground(size: CGSize) -> SKSpriteNode {
-        let node = SKSpriteNode(color: .white, size: size)
+        let node = SKSpriteNode(color: UIColor(named: "BackgroundColor") ?? .white, size: size)
         node.shader = paperShader
         node.zPosition = -100
         return node
@@ -43,7 +43,7 @@ class GraphicsManager {
     static func createTagNode(size: CGSize) -> SKShapeNode {
         let rect = CGRect(origin: CGPoint(x: -size.width/2, y: -size.height/2), size: size)
         let node = SKShapeNode(rect: rect, cornerRadius: 8)
-        node.fillColor = UIColor(white: 0.95, alpha: 1.0)
+        node.fillColor = UIColor(named: "BackgroundColor") ?? UIColor(white: 0.95, alpha: 1.0)
         node.strokeColor = .gray
         node.lineWidth = 1
         
