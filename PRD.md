@@ -1,64 +1,65 @@
-# Metro Manager - PRD v1.0
+# Go Line - PRD v1.1
 
 ## Core Identity
-**Type**: iOS landscape train/metro management sim  
-**Goal**: Build profitable transit network via line creation, train ops, passenger satisfaction
+**Type**: iOS landscape transit management sim with embroidery aesthetics  
+**Goal**: Sew a beautiful transit network through Go Line.
 
 ## Functional Requirements
 
-### F1: Line Management
-- **CREATE**: Draw routes connecting stations (touch-drag interface)
-- **EDIT**: Modify existing routes (add/remove stations)
-- **DELETE**: Remove unprofitable lines
-- **VIEW**: Visual overlay showing all active lines (color-coded)
+### F1: Stitch Management (Lines)
+- **CREATE**: Draw curved threads connecting stations (touch-drag interface).
+- **CURVES**: Threads use quadratic Bezier curves for a soft, woven look.
+- **EDIT**: Modify existing threads (add/remove stations).
+- **DELETE**: Remove inefficient stitches.
+- **VIEW**: Visual overlay showing all active threads (color-coded embroidery floss).
 
-### F2: Train Operations
-- **DEPLOY**: Assign trains to lines (1-N trains per line)
-- **ANIMATE**: Real-time train movement along routes
-  - Speed varies by train type
-  - Stops at stations (3-5s dwell time)
-  - Collision avoidance at junctions
-- **UPGRADE**: Improve capacity/speed
+### F2: Shuttle Operations (Trains)
+- **DEPLOY**: Assign shuttles to threads (1-N per thread).
+- **ANIMATE**: Real-time movement along curved paths.
+  - Speed varies by shuttle type.
+  - Stops at stations (3-5s dwell time).
+  - Collision avoidance at junctions (simulated via offset).
+- **UPGRADE**: Improve capacity/speed.
 
-### F3: Passenger System
-- **SPAWN**: Generate passengers at stations (demand-based)
-- **QUEUE**: Visual waiting passengers at platforms
-- **BOARD**: Auto-board when train arrives (capacity limits)
-- **DESTINATION**: Each passenger has target station
-- **SATISFACTION**: Time-based happiness decay
+### F3: Passenger System (Stitches)
+- **SPAWN**: Generate passengers (buttons) at stations.
+- **QUEUE**: Visual waiting buttons at platforms.
+- **BOARD**: Auto-board when shuttle arrives (capacity limits).
+- **DESTINATION**: Each passenger (button) has a target station shape.
+- **SATISFACTION**: Time-based happiness decay.
 
-### F4: Rating System
-**Per-Line Metrics**:
-- Efficiency: avg trip time / optimal time (target: >0.7)
-- Coverage: stations served / total stations
-- Utilization: passengers carried / capacity
-- Punctuality: on-time arrivals %
+### F4: Rating System (Pattern Quality)
+**Per-Thread Metrics**:
+- Efficiency: avg trip time / optimal time (target: >0.7).
+- Coverage: stations served / total stations.
+- Utilization: passengers carried / capacity.
+- Punctuality: on-time arrivals %.
 
-**Overall Score**: Weighted average → star rating (1-5★)
+**Overall Pattern Score**: Weighted average → star rating (1-5★).
 
-### F5: Line-Specific Management
-**Per-Line Controls**:
-- Train count adjustment
-- Frequency tuning (headway)
-- Upgrade allocation
-- Enable/disable toggle
+### F5: Thread-Specific Management
+**Per-Thread Controls**:
+- Shuttle count adjustment.
+- Frequency tuning.
+- Upgrade allocation.
+- Enable/disable toggle.
 
-**Dashboard View**:
-- Revenue vs cost per line
-- Passenger throughput
-- Problem indicators (overcrowding, delays)
+**Pattern Dashboard**:
+- Revenue vs cost per thread.
+- Passenger throughput (stitches/min).
+- Problem indicators (Fabric Fraying, delays).
 
-## Technical Constraints
-- **Platform**: iOS 15+, landscape only
-- **Framework**: Swift + SpriteKit
-- **Performance**: 60fps with 10+ active trains
-- **Save**: Local persistence (CoreData/Realm)
-- **Monetization**: [TBD - freemium/premium]
+## Technical Requirements
+- **Platform**: iOS 15+, landscape only.
+- **Framework**: Swift + SpriteKit.
+- **Visuals**: Bezier curves for threads, embroidery textures (GraphicsManager).
+- **Performance**: 60fps with 10+ active shuttles and curved path calculations.
+- **Save**: Local persistence (CoreData/Realm).
 
 ## Success Metrics
-- Session length: >10min avg
-- D1 retention: >40%
-- Rating submission: >60% of games
+- Session length: >10min avg.
+- D1 retention: >40%.
+- Rating submission: >60% of games.
 
 ## Out of Scope (v1)
-- Multiplayer, disasters, weather, real-world maps
+- Multiplayer, disasters, weather, real-world maps.
