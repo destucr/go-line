@@ -180,14 +180,16 @@ extension GameScene {
 
     private func renderCarriage(index: Int, context: TrainRenderContext, node: SKNode?) {
         let distOffset = CGFloat(index) * context.offsetPerCarriage
-        let targetDist = context.train.isReversed ? (context.headDist + distOffset) : (context.headDist - distOffset)
+        // No waitOffset: Train stays at the stopping point
+        let currentHeadDist = context.headDist
+        let targetDist = context.train.isReversed ? (currentHeadDist + distOffset) : (currentHeadDist - distOffset)
         
         guard let state = getPointAtDistance(points: context.pathPoints, distance: targetDist) else { return }
         
         // Connector (except for the first carriage)
         if index > 0 {
             let connectorOffset = distOffset - (context.carriageWidth / 2 + context.spacing / 2)
-            let connectorDist = context.train.isReversed ? (context.headDist + connectorOffset) : (context.headDist - connectorOffset)
+            let connectorDist = context.train.isReversed ? (currentHeadDist + connectorOffset) : (currentHeadDist - connectorOffset)
             if let cState = getPointAtDistance(points: context.pathPoints, distance: connectorDist) {
                 let connector = SKShapeNode(rectOf: CGSize(width: context.spacing + 2, height: 4), cornerRadius: 1)
                 connector.fillColor = .darkGray
@@ -196,14 +198,6 @@ extension GameScene {
                 connector.zRotation = context.train.isReversed ? cState.angle + .pi : cState.angle
                 connector.zPosition = -1
                 
-                // Animate connector alpha
-                var cAlpha: CGFloat = 1.0
-                for sDist in context.stationDistances {
-                    let d = abs(connectorDist - sDist)
-                    if d < 20 { cAlpha = max(0, (d - 5) / 15) }
-                }
-                connector.alpha = cAlpha
-                
                 node?.addChild(connector)
             }
         }
@@ -211,17 +205,6 @@ extension GameScene {
         let cNode = GraphicsManager.createTrainShape(color: context.line.color)
         cNode.position = state.point
         cNode.zRotation = context.train.isReversed ? state.angle + .pi : state.angle
-        
-        // Animate carriage alpha based on distance to any station center
-        var carriageAlpha: CGFloat = 1.0
-        for sDist in context.stationDistances {
-            let d = abs(targetDist - sDist)
-            if d < 20 {
-                // Fully hidden when within 5px of center, fades out over the 15px leading to it
-                carriageAlpha = min(carriageAlpha, max(0, (d - 5) / 15))
-            }
-        }
-        cNode.alpha = carriageAlpha
         
         node?.addChild(cNode)
         
