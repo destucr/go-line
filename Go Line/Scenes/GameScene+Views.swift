@@ -182,14 +182,16 @@ extension GameScene {
         let distOffset = CGFloat(index) * context.offsetPerCarriage
         // No waitOffset: Train stays at the stopping point
         let currentHeadDist = context.headDist
-        let targetDist = context.train.isReversed ? (currentHeadDist + distOffset) : (currentHeadDist - distOffset)
+        // Fix: Always trail "behind" the head in terms of distance (towards 0).
+        // This keeps carriages on the track even when reversing from the end of the line.
+        let targetDist = currentHeadDist - distOffset
         
         guard let state = getPointAtDistance(points: context.pathPoints, distance: targetDist) else { return }
         
         // Connector (except for the first carriage)
         if index > 0 {
             let connectorOffset = distOffset - (context.carriageWidth / 2 + context.spacing / 2)
-            let connectorDist = context.train.isReversed ? (currentHeadDist + connectorOffset) : (currentHeadDist - connectorOffset)
+            let connectorDist = currentHeadDist - connectorOffset
             if let cState = getPointAtDistance(points: context.pathPoints, distance: connectorDist) {
                 let connector = SKShapeNode(rectOf: CGSize(width: context.spacing + 2, height: 4), cornerRadius: 1)
                 connector.fillColor = .darkGray
