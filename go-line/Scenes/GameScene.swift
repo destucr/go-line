@@ -373,17 +373,8 @@ class GameScene: SKScene {
             
             train.progress += progressDelta
             
-            // Curved Position Calculation
-            let midX = (fromPos.x + toPos.x) / 2
-            let midY = (fromPos.y + toPos.y) / 2
-            let dx = toPos.x - fromPos.x
-            let dy = toPos.y - fromPos.y
-            
-            // Control point offset for curve
-            let curveOffset: CGFloat = 30.0
-            let normalX = -dy / segmentDist
-            let normalY = dx / segmentDist
-            let controlPoint = CGPoint(x: midX + normalX * curveOffset, y: midY + normalY * curveOffset)
+            // Unified Curved Position Calculation
+            let controlPoint = getControlPoint(from: fromPos, to: toPos)
             
             // Quadratic Bezier Formula: (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
             let t = train.progress
@@ -1015,16 +1006,7 @@ class GameScene: SKScene {
     private func updateDraftLine(from startPos: CGPoint, to currentPos: CGPoint) {
         guard let draft = currentDraftLine else { return }
         
-        let dist = hypot(currentPos.x - startPos.x, currentPos.y - startPos.y)
-        let midX = (startPos.x + currentPos.x) / 2
-        let midY = (startPos.y + currentPos.y) / 2
-        let dx = currentPos.x - startPos.x
-        let dy = currentPos.y - startPos.y
-        
-        let curveOffset: CGFloat = 30.0 * (dist / 200.0) // Scale curve with distance
-        let normalX = -dy / dist
-        let normalY = dx / dist
-        let controlPoint = CGPoint(x: midX + normalX * curveOffset, y: midY + normalY * curveOffset)
+        let controlPoint = getControlPoint(from: startPos, to: currentPos)
         
         let path = CGMutablePath()
         path.move(to: startPos)
@@ -1041,6 +1023,12 @@ class GameScene: SKScene {
     private func completeConnection(from start: UUID, to end: UUID) {
         // Logic to update metroLines
         var line = metroLines[currentLineColor]
+        
+        // Haptic Feedback for connection
+        if #available(iOS 10.0, *) {
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+        }
         
         if line == nil {
             // New Line
@@ -1091,16 +1079,8 @@ class GameScene: SKScene {
         
         let startPos = startNode.position
         let endPos = endNode.position
-        let dist = hypot(endPos.x - startPos.x, endPos.y - startPos.y)
-        let midX = (startPos.x + endPos.x) / 2
-        let midY = (startPos.y + endPos.y) / 2
-        let dx = endPos.x - startPos.x
-        let dy = endPos.y - startPos.y
         
-        let curveOffset: CGFloat = 30.0
-        let normalX = -dy / dist
-        let normalY = dx / dist
-        let controlPoint = CGPoint(x: midX + normalX * curveOffset, y: midY + normalY * curveOffset)
+        let controlPoint = getControlPoint(from: startPos, to: endPos)
         
         let path = CGMutablePath()
         path.move(to: startPos)
@@ -1135,5 +1115,28 @@ class GameScene: SKScene {
         endNode.run(pulse)
         
         addChild(lineSeg)
+    }
+    
+    // MARK: - Standardized Curve Logic
+    private func getControlPoint(from: CGPoint, to: CGPoint) -> CGPoint {
+        let dx = to.x - from.x
+        let dy = to.y - from.y
+        let dist = hypot(dx, dy)
+        
+        // Normalize mid-point
+        let midX = (from.x + to.x) / 2
+        let midY = (from.y + to.y) / 2
+        
+        // To make it look like a metro map, we want more structured bends.
+        // Instead of a random perpendicular offset, let's bias it based on the primary axis.
+        // This creates a more 'Transit-like' purposeful curve.
+        
+        let curveScale: CGFloat = min(dist * 0.2, 50.0) // Scale curve with distance but cap it
+        
+        // Perpendicular vector
+        let normalX = -dy / dist
+        let normalY = dx / dist
+        
+        return CGPoint(x: midX + normalX * curveScale, y: midY + normalY * curveScale)
     }
 }
