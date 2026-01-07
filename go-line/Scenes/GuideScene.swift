@@ -38,22 +38,22 @@ class GuideScene: SKScene {
     
     private func createContent() {
         // Title
-        title.fontName = "AvenirNext-Bold"
+        title.fontName = "ChalkboardSE-Bold"
         title.fontSize = 40
         title.fontColor = .darkGray
         addChild(title)
         
         // Instructions
         let instructions = [
-            "1. Touch and drag from a station to draw a line.",
-            "2. Connect different shapes (Circle -> Square).",
-            "3. Don't let stations overcrowd!",
-            "4. Use the menu to switch line colors."
+            "1. Touch and drag from a station to stitch a thread.",
+            "2. Connect different shapes to deliver button passengers.",
+            "3. Don't let the fabric fray or snap!",
+            "4. Match thread colors to the pattern needs."
         ]
         
         for text in instructions {
             let label = SKLabelNode(text: text)
-            label.fontName = "AvenirNext-Medium"
+            label.fontName = "ChalkboardSE-Regular"
             label.fontSize = 20
             label.fontColor = .darkGray
             addChild(label)
@@ -69,7 +69,7 @@ class GuideScene: SKScene {
         container.addChild(bg)
         
         let btnLabel = SKLabelNode(text: "Back")
-        btnLabel.fontName = "AvenirNext-Bold"
+        btnLabel.fontName = "ChalkboardSE-Bold"
         btnLabel.fontSize = 20
         btnLabel.verticalAlignmentMode = .center
         btnLabel.fontColor = .darkGray

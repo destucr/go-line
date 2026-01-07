@@ -6,7 +6,8 @@ class MenuScene: SKScene {
     var onGuideButtonTapped: (() -> Void)?
     
     // Nodes
-    private let titleNode = SKLabelNode(text: "Metro Manager")
+    private let titleNode = SKLabelNode(text: "Metro Stitcher")
+    private var subtitleNode = SKLabelNode(text: "Embroider the Transit Pattern")
     private var playButton: SKNode!
     private var guideButton: SKNode!
     
@@ -40,10 +41,15 @@ class MenuScene: SKScene {
     
     private func createMenuUI() {
         // Title
-        titleNode.fontName = "AvenirNext-Bold"
+        titleNode.fontName = "ChalkboardSE-Bold"
         titleNode.fontSize = 50
-        titleNode.fontColor = .darkGray // Changed to match theme better
+        titleNode.fontColor = .darkGray
         addChild(titleNode)
+        
+        subtitleNode.fontName = "ChalkboardSE-Regular"
+        subtitleNode.fontSize = 18
+        subtitleNode.fontColor = .systemBlue
+        addChild(subtitleNode)
         
         // Play Button
         playButton = createButton(text: "Play Game", name: "play_btn")
@@ -59,7 +65,8 @@ class MenuScene: SKScene {
         let centerX = size.width / 2
         let centerY = size.height / 2
         
-        titleNode.position = CGPoint(x: centerX, y: centerY + 80)
+        titleNode.position = CGPoint(x: centerX, y: centerY + 100)
+        subtitleNode.position = CGPoint(x: centerX, y: centerY + 65)
         playButton.position = CGPoint(x: centerX, y: centerY - 10)
         guideButton.position = CGPoint(x: centerX, y: centerY - 90)
     }
