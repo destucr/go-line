@@ -1,0 +1,29 @@
+[
+  {
+    "character" : 13,
+    "file" : "/Users/destucr/Desktop/go-line/go-line/Go Line/Scenes/GameScene+Views.swift",
+    "line" : 160,
+    "reason" : "Function should have 5 parameters or less: it currently has 10",
+    "rule_id" : "function_parameter_count",
+    "severity" : "Error",
+    "type" : "Function Parameter Count"
+  },
+  {
+    "character" : 1,
+    "file" : "/Users/destucr/Desktop/go-line/go-line/Go Line/Scenes/GameScene+Views.swift",
+    "line" : 153,
+    "reason" : "Line should be 200 characters or less; currently it has 240 characters",
+    "rule_id" : "line_length",
+    "severity" : "Error",
+    "type" : "Line Length"
+  },
+  {
+    "character" : 1,
+    "file" : "/Users/destucr/Desktop/go-line/go-line/Go Line/Scenes/GameScene+Views.swift",
+    "line" : 160,
+    "reason" : "Line should be 200 characters or less; currently it has 228 characters",
+    "rule_id" : "line_length",
+    "severity" : "Error",
+    "type" : "Line Length"
+  }
+]

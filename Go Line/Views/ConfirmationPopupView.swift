@@ -12,7 +12,7 @@ struct ConfirmationPopupView: View {
     var body: some View {
         ZStack {
             // Semi-transparent background
-            Color.black.opacity(0.6)
+            Color.black.opacity(0.8)
                 .edgesIgnoringSafeArea(.all)
                 .onTapGesture {
                     onCancel()
@@ -21,46 +21,50 @@ struct ConfirmationPopupView: View {
             // Popup Container
             VStack(spacing: 25) {
                 Text(title)
-                    .font(.custom("ChalkboardSE-Bold", size: 28))
-                    .foregroundColor(.indigo)
+                    .font(.system(size: 24, weight: .black, design: .monospaced))
+                    .foregroundColor(.orange)
                 
                 Text(message)
-                    .font(.custom("ChalkboardSE-Bold", size: 18))
-                    .foregroundColor(.gray)
+                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 20)
                 
                 HStack(spacing: 20) {
                     Button(action: onCancel) {
                         Text(cancelText)
-                            .font(.custom("ChalkboardSE-Bold", size: 20))
+                            .font(.system(size: 16, weight: .black, design: .monospaced))
                             .frame(width: 140, height: 50)
-                            .background(Color.white)
-                            .foregroundColor(.black)
-                            .cornerRadius(12)
+                            .background(Color.white.opacity(0.1))
+                            .foregroundColor(.white)
+                            .cornerRadius(6)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.gray, lineWidth: 2)
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
                             )
                             .contentShape(Rectangle())
                     }
                     
                     Button(action: onExit) {
                         Text(exitText)
-                            .font(.custom("ChalkboardSE-Bold", size: 20))
+                            .font(.system(size: 16, weight: .black, design: .monospaced))
                             .frame(width: 140, height: 50)
-                            .background(Color.red)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
+                            .background(Color.orange)
+                            .foregroundColor(.black)
+                            .cornerRadius(6)
                             .contentShape(Rectangle())
                     }
                 }
             }
             .padding(.vertical, 40)
             .padding(.horizontal, 30)
-            .background(Color("BackgroundColor"))
-            .cornerRadius(25)
-            .shadow(radius: 20)
+            .background(Color(white: 0.1))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
+            .shadow(color: .black, radius: 20)
             .frame(maxWidth: 400)
             .padding(.horizontal, 40)
         }

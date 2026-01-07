@@ -47,8 +47,8 @@ extension GameScene {
         
         // Initial Seed: 3 Common Stations (Triangle, Circle, Square)
         // Placed roughly in a triangle in the center
-        let safeInsets: UIEdgeInsets = view?.safeAreaInsets ?? .zero
-        let padding: CGFloat = 100
+        let _: UIEdgeInsets = view?.safeAreaInsets ?? .zero
+        let _: CGFloat = 100
         let w = size.width
         let h = size.height
         
@@ -66,7 +66,7 @@ extension GameScene {
     }
     
     func spawnNewStation() {
-        guard let view = view else { return }
+        guard view != nil else { return }
         
         // 1. Determine Type (Weighted)
         // Common: Circle (40%), Triangle (30%), Square (20%)
@@ -74,10 +74,13 @@ extension GameScene {
         let roll = Int.random(in: 1...100)
         var newType: StationType = .circle
         
-        if roll <= 40 { newType = .circle }
-        else if roll <= 70 { newType = .triangle }
-        else if roll <= 90 { newType = .square }
-        else {
+        if roll <= 40 {
+            newType = .circle
+        } else if roll <= 70 {
+            newType = .triangle
+        } else if roll <= 90 {
+            newType = .square
+        } else {
             let uniques: [StationType] = [.pentagon, .star, .diamond, .cross, .wedge, .oval]
             newType = uniques.randomElement() ?? .pentagon
         }
@@ -113,11 +116,9 @@ extension GameScene {
             
             // Distance check
             var tooClose = false
-            for s in gameStations {
-                if hypot(s.position.x - candidate.x, s.position.y - candidate.y) < 100 {
-                    tooClose = true
-                    break
-                }
+            for s in gameStations where hypot(s.position.x - candidate.x, s.position.y - candidate.y) < 100 {
+                tooClose = true
+                break
             }
             
             if !tooClose {
@@ -143,11 +144,17 @@ extension GameScene {
             return
         }
         
-        if score >= 100 && level < 6 { newLevel = 6 }
-        else if score >= 75 && level < 5 { newLevel = 5 }
-        else if score >= 50 && level < 4 { newLevel = 4 }
-        else if score >= 30 && level < 3 { newLevel = 3 }
-        else if score >= 15 && level < 2 { newLevel = 2 }
+        if score >= 100 && level < 6 {
+            newLevel = 6
+        } else if score >= 75 && level < 5 {
+            newLevel = 5
+        } else if score >= 50 && level < 4 {
+            newLevel = 4
+        } else if score >= 30 && level < 3 {
+            newLevel = 3
+        } else if score >= 15 && level < 2 {
+            newLevel = 2
+        }
         
         if newLevel > level {
             level = newLevel
@@ -186,7 +193,7 @@ extension GameScene {
         
         let confetti = GraphicsManager.createConfettiEmitter()
         confetti.position = newCenter // Center on new world center
-        confetti.zPosition = 1001
+        confetti.zPosition = 1_001
         addChild(confetti)
         
         run(SKAction.sequence([
@@ -287,8 +294,6 @@ extension GameScene {
         }
     }
     
-
-    
     func triggerGameOver(reason: String) {
         isGameOver = true
         // Thematic copy for metro management
@@ -314,7 +319,7 @@ extension GameScene {
         guard let destType = validDestinations.randomElement() else {
              // Fallback: if only one type of station exists, maybe just don't spawn? 
              // Or spawn for a future station? Let's skip spawning to avoid overcrowding with un-movable passengers.
-             return 
+             return
         }
         
         let passenger = Passenger(id: UUID(), destinationType: destType, spawnTime: lastUpdateTime)
@@ -489,8 +494,6 @@ extension GameScene {
         addChild(towerNode)
     }
     
-
-    
     func createSewingScraps() {
         let w = worldSize.width > 0 ? worldSize.width : size.width * 2
         let h = worldSize.height > 0 ? worldSize.height : size.height * 2
@@ -498,8 +501,8 @@ extension GameScene {
         for _ in 0..<30 {
             let scrap = GraphicsManager.createScrapNode()
             scrap.position = CGPoint(
-                x: CGFloat.random(in: 100...w-100),
-                y: CGFloat.random(in: 100...h-100)
+                x: CGFloat.random(in: 100...w - 100),
+                y: CGFloat.random(in: 100...h - 100)
             )
             scrap.zPosition = -50
             addChild(scrap)

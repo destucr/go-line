@@ -4,130 +4,99 @@ class GraphicsManager {
     
     // MARK: - Shaders
     
-    static let paperShader: SKShader = {
+    /// A Metal-compatible SKShader providing a subtle brushed steel texture.
+    /// Directional micro-noise simulates machining marks.
+    static let metalShader: SKShader = {
         let source = """
         void main() {
-            vec2 pos = v_tex_coord * u_size; // Use pixel position for consistent noise scale
-            float noise = fract(sin(dot(pos, vec2(12.9898, 78.233))) * 43758.5453);
-            vec3 color = vec3(0.96, 0.96, 0.92); // Beige/Paper base
-            color -= noise * 0.08; // Subtract noise for grain
-            gl_FragColor = vec4(color, 1.0);
+            vec2 uv = v_tex_coord;
+            // High-frequency directional noise for brushed effect
+            float noise = fract(sin(dot(uv * vec2(1.0, 1000.0), vec2(12.9898, 78.233))) * 43758.5453);
+            
+            vec3 baseColor = vec3(0.12, 0.13, 0.15); // Deep Slate
+            vec3 highlight = vec3(0.18, 0.19, 0.21); // Steel Highlight
+            
+            vec3 finalColor = mix(baseColor, highlight, noise * 0.15);
+            
+            // Subtle vignette for focus
+            float dist = distance(uv, vec2(0.5, 0.5));
+            finalColor *= smoothstep(1.2, 0.4, dist);
+            
+            gl_FragColor = vec4(finalColor, 1.0);
         }
         """
-        let shader = SKShader(source: source)
-        // We pass 'u_size' from the node using the shader if needed,
-        // but often v_tex_coord is enough if we just want random noise per pixel.
-        // To make it screen-relative independent of node size, we might need uniforms.
-        // For simplicity, let's use standard v_tex_coord.
-        
-        let simpleSource = """
-        void main() {
-            float noise = fract(sin(dot(v_tex_coord, vec2(12.9898, 78.233))) * 43758.5453);
-            vec3 color = vec3(0.96, 0.96, 0.90);
-            color -= noise * 0.05;
-            gl_FragColor = vec4(color, 1.0);
-        }
-        """
-        return SKShader(source: simpleSource)
+        return SKShader(source: source)
     }()
     
     // MARK: - Shape Generators
     
     static func createBackground(size: CGSize) -> SKSpriteNode {
-        let node = SKSpriteNode(color: UIColor(named: "BackgroundColor") ?? .white, size: size)
-        node.shader = paperShader
+        let node = SKSpriteNode(color: .black, size: size)
+        node.shader = metalShader
         node.zPosition = -100
         return node
     }
     
     static func createTagNode(size: CGSize) -> SKShapeNode {
-        let rect = CGRect(origin: CGPoint(x: -size.width/2, y: -size.height/2), size: size)
-        let node = SKShapeNode(rect: rect, cornerRadius: 8)
-        node.fillColor = UIColor(named: "BackgroundColor") ?? UIColor(white: 0.95, alpha: 1.0)
-        node.strokeColor = .gray
-        node.lineWidth = 1
-        
-        // Stitch effect
-        let stitchRect = rect.insetBy(dx: 3, dy: 3)
-        let stitchPath = CGPath(roundedRect: stitchRect, cornerWidth: 6, cornerHeight: 6, transform: nil)
-        let stitch = SKShapeNode(path: stitchPath)
-        
-        // Create dashed pattern manually or via dashPhase
-        // Note: SKShapeNode copy(dashingWithPhase...) works on the path
-        let dashedPath = stitchPath.copy(dashingWithPhase: 0, lengths: [4, 4])
-        stitch.path = dashedPath
-        
-        stitch.strokeColor = .darkGray
-        stitch.lineWidth = 1
-        node.addChild(stitch)
+        let rect = CGRect(origin: CGPoint(x: -size.width / 2, y: -size.height / 2), size: size)
+        let node = SKShapeNode(rect: rect, cornerRadius: 4) // Sharper industrial radius
+        node.fillColor = UIColor(white: 0.1, alpha: 1.0)
+        node.strokeColor = UIColor(white: 0.3, alpha: 1.0)
+        node.lineWidth = 2
         
         return node
     }
     
-    static func createStationShape(type: StationType, radius: CGFloat) -> SKShapeNode {
+    static func createStationShape(type: StationType, radius: CGFloat, lineWidth: CGFloat = 4) -> SKShapeNode {
         let node: SKShapeNode
         
         switch type {
         case .circle:
             node = SKShapeNode(circleOfRadius: radius)
         case .square:
-            let rect = CGRect(x: -radius, y: -radius, width: radius*2, height: radius*2)
+            let rect = CGRect(x: -radius, y: -radius, width: radius * 2, height: radius * 2)
             node = SKShapeNode(rect: rect, cornerRadius: 4)
         case .triangle:
             let path = CGMutablePath()
-            // Triangle pointing up
             let h = radius * sqrt(3)
-            // Center centroid
             let yOffset = h / 3
             path.move(to: CGPoint(x: 0, y: h - yOffset))
             path.addLine(to: CGPoint(x: -radius, y: -yOffset))
             path.addLine(to: CGPoint(x: radius, y: -yOffset))
             path.closeSubpath()
             node = SKShapeNode(path: path)
-            node.lineJoin = .round
             
         case .pentagon:
             let path = CGMutablePath()
             for i in 0..<5 {
                 let angle = CGFloat(i) * (2 * .pi / 5) + .pi / 2
                 let point = CGPoint(x: cos(angle) * radius, y: sin(angle) * radius)
-                if i == 0 {
-                    path.move(to: point)
-                } else {
-                    path.addLine(to: point)
-                }
+                if i == 0 { path.move(to: point) } else { path.addLine(to: point) }
             }
             path.closeSubpath()
             node = SKShapeNode(path: path)
-            node.lineJoin = .round
-            
+
         case .star:
             let path = CGMutablePath()
             let outerRadius = radius
-            let innerRadius = radius * 0.4
+            let innerRadius = radius * 0.45
             for i in 0..<10 {
                 let angle = CGFloat(i) * (2 * .pi / 10) + .pi / 2
                 let r = (i % 2 == 0) ? outerRadius : innerRadius
                 let point = CGPoint(x: cos(angle) * r, y: sin(angle) * r)
-                if i == 0 {
-                    path.move(to: point)
-                } else {
-                    path.addLine(to: point)
-                }
+                if i == 0 { path.move(to: point) } else { path.addLine(to: point) }
             }
             path.closeSubpath()
             node = SKShapeNode(path: path)
-            node.lineJoin = .round
             
         case .diamond:
             let path = CGMutablePath()
             path.move(to: CGPoint(x: 0, y: radius))
-            path.addLine(to: CGPoint(x: radius * 0.8, y: 0))
+            path.addLine(to: CGPoint(x: radius * 0.9, y: 0))
             path.addLine(to: CGPoint(x: 0, y: -radius))
-            path.addLine(to: CGPoint(x: -radius * 0.8, y: 0))
+            path.addLine(to: CGPoint(x: -radius * 0.9, y: 0))
             path.closeSubpath()
             node = SKShapeNode(path: path)
-            node.lineJoin = .round
             
         case .cross:
             let path = CGMutablePath()
@@ -147,90 +116,52 @@ class GraphicsManager {
             path.addLine(to: CGPoint(x: -w, y: w))
             path.closeSubpath()
             node = SKShapeNode(path: path)
-            node.lineJoin = .round
             
         case .wedge:
             let path = CGMutablePath()
-            // Teardrop shape
-            path.addArc(center: CGPoint(x: 0, y: -radius * 0.2), radius: radius * 0.8, startAngle: 0, endAngle: .pi, clockwise: false)
+            path.addArc(center: CGPoint(x: 0, y: -radius * 0.1), radius: radius * 0.9, startAngle: 0, endAngle: .pi, clockwise: false)
             path.addLine(to: CGPoint(x: 0, y: radius))
             path.closeSubpath()
             node = SKShapeNode(path: path)
-            node.lineJoin = .round
             
         case .oval:
-            let rect = CGRect(x: -radius * 1.2, y: -radius * 0.7, width: radius * 2.4, height: radius * 1.4)
+            let rect = CGRect(x: -radius * 1.3, y: -radius * 0.8, width: radius * 2.6, height: radius * 1.6)
             node = SKShapeNode(ellipseIn: rect)
         }
         
         node.fillColor = .white
-        node.strokeColor = .darkGray
-        node.lineWidth = 2
+        node.strokeColor = UIColor(white: 0.1, alpha: 1.0)
+        node.lineWidth = lineWidth
         
         return node
     }
     
     static func createTrainShape(color: UIColor) -> SKShapeNode {
-        let width: CGFloat = 24
-        let height: CGFloat = 12
-        let rect = CGRect(x: -width/2, y: -height/2, width: width, height: height)
-        let node = SKShapeNode(rect: rect, cornerRadius: 4)
+        let width: CGFloat = 28
+        let height: CGFloat = 16
+        let rect = CGRect(x: -width / 2, y: -height / 2, width: width, height: height)
+        let node = SKShapeNode(rect: rect, cornerRadius: 3)
         node.fillColor = color
-        node.strokeColor = UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0) // Charcoal outline
+        node.strokeColor = .white
         node.lineWidth = 2
+        
+        // Add a subtle "window" or detail to the train
+        let window = SKShapeNode(rect: CGRect(x: -width / 2 + 4, y: -height / 2 + 3, width: width - 8, height: height - 6), cornerRadius: 1)
+        window.fillColor = UIColor.white.withAlphaComponent(0.3)
+        window.strokeColor = .clear
+        node.addChild(window)
+        
         return node
     }
     
-    static func createScrapNode() -> SKNode {
-        let container = SKNode()
-        container.alpha = 0.2
-        
-        // Random scrap types (thread snips, small patches)
-        let type = Int.random(in: 0...2)
-        switch type {
-        case 0:
-            // Crossed Threads
-            let path = CGMutablePath()
-            path.move(to: CGPoint(x: -10, y: -5))
-            path.addLine(to: CGPoint(x: 10, y: 5))
-            path.move(to: CGPoint(x: -5, y: 10))
-            path.addLine(to: CGPoint(x: 5, y: -10))
-            let lines = SKShapeNode(path: path)
-            lines.strokeColor = .gray
-            lines.lineWidth = 1
-            container.addChild(lines)
-        case 1:
-            // Small Fabric Patch (Dashed square)
-            let rect = CGRect(x: -8, y: -8, width: 16, height: 16)
-            let patch = SKShapeNode(rect: rect, cornerRadius: 2)
-            patch.strokeColor = .lightGray
-            patch.lineWidth = 1
-            if let dashed = patch.path?.copy(dashingWithPhase: 0, lengths: [2, 2]) {
-                patch.path = dashed
-            }
-            container.addChild(patch)
-        default:
-            // Loose Loop
-            let path = CGMutablePath()
-            path.addEllipse(in: CGRect(x: -6, y: -6, width: 12, height: 12))
-            let loop = SKShapeNode(path: path)
-            loop.strokeColor = .gray
-            loop.lineWidth = 0.5
-            container.addChild(loop)
-        }
-        
-        container.zRotation = CGFloat.random(in: 0...(2 * .pi))
-        return container
-    }
-    
     static func createProgressBar(size: CGSize) -> (container: SKShapeNode, fill: SKShapeNode) {
-        let container = SKShapeNode(rectOf: size, cornerRadius: size.height/2)
-        container.fillColor = .white
-        container.strokeColor = .lightGray
+        let container = SKShapeNode(rectOf: size, cornerRadius: 2)
+        container.fillColor = UIColor(white: 0.1, alpha: 1.0)
+        container.strokeColor = UIColor(white: 0.3, alpha: 1.0)
         container.lineWidth = 1
         
-        let fill = SKShapeNode(rect: CGRect(x: -size.width/2, y: -size.height/2, width: 0, height: size.height), cornerRadius: size.height/2)
-        fill.fillColor = .systemGreen
+        let fill = SKShapeNode(rect: CGRect(x: -size.width / 2, y: -size.height / 2, width: 0, height: size.height), cornerRadius: 0)
+        fill.fillColor = .systemOrange // High visibility industrial orange
         fill.strokeColor = .clear
         container.addChild(fill)
         
@@ -239,23 +170,33 @@ class GraphicsManager {
     
     static func createConfettiEmitter() -> SKEmitterNode {
         let emitter = SKEmitterNode()
-        emitter.particleBirthRate = 100
-        emitter.numParticlesToEmit = 50
-        emitter.particleLifetime = 2.0
-        emitter.particleSpeed = 150
+        emitter.particleBirthRate = 120
+        emitter.numParticlesToEmit = 60
+        emitter.particleLifetime = 1.5
+        emitter.particleSpeed = 200
         emitter.particleAlpha = 1.0
-        emitter.particleAlphaSpeed = -0.5
-        emitter.particleScale = 0.5
-        emitter.particleRotation = 0
+        emitter.particleAlphaSpeed = -0.8
+        emitter.particleScale = 0.4
         emitter.emissionAngleRange = .pi * 2
-        emitter.particleColorSequence = SKKeyframeSequence(keyframeValues: [UIColor.red, UIColor.blue, UIColor.green, UIColor.yellow], times: [0, 0.33, 0.66, 1.0])
         
-        let circle = SKShapeNode(circleOfRadius: 4)
-        circle.fillColor = .white
-        if let texture = SKView().texture(from: circle) {
+        // Industrial sparks instead of colorful confetti
+        emitter.particleColorSequence = SKKeyframeSequence(keyframeValues: [UIColor.orange, UIColor.yellow, UIColor.white], times: [0, 0.5, 1.0])
+        
+        let spark = SKShapeNode(rectOf: CGSize(width: 4, height: 4))
+        spark.fillColor = .white
+        if let texture = SKView().texture(from: spark) {
             emitter.particleTexture = texture
         }
         
         return emitter
+    }
+    
+    static func createScrapNode() -> SKNode {
+        let size = CGSize(width: CGFloat.random(in: 10...30), height: CGFloat.random(in: 10...30))
+        let node = SKShapeNode(rectOf: size, cornerRadius: 2)
+        node.fillColor = UIColor(white: 0.9, alpha: 0.3)
+        node.strokeColor = .clear
+        node.zRotation = CGFloat.random(in: 0...( .pi * 2))
+        return node
     }
 }

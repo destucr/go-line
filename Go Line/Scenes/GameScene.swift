@@ -54,7 +54,8 @@ class GameScene: SKScene {
     
     // MARK: - View Cache
     var stationNodes: [UUID: SKShapeNode] = [:]
-    var trainNodes: [UUID: SKShapeNode] = [:]
+    var trainNodes: [UUID: SKNode] = [:]
+    var lineNodes: [SKNode] = []
     var uiNodes: [String: SKNode] = [:]
     
     // MARK: - Interaction State
@@ -82,7 +83,7 @@ class GameScene: SKScene {
         // Setup Camera
         addChild(cameraNode)
         camera = cameraNode
-        cameraNode.position = CGPoint(x: worldSize.width/2, y: worldSize.height/2)
+        cameraNode.position = CGPoint(x: worldSize.width / 2, y: worldSize.height / 2)
         
         isUserInteractionEnabled = true
         
@@ -137,8 +138,20 @@ class GameScene: SKScene {
     
     func advanceDay() {
         isGamePaused = false
+        lastUpdateTime = 0 // Reset timer to prevent dt jump
         // Slower tension recovery overnight
-        tension = max(0, tension - 20) 
+        tension = max(0, tension - 20)
         DayCycleManager.shared.startDay()
+    }
+    
+    func setCameraZoom(_ scale: CGFloat) {
+        // Clamp zoom between 0.5x and 2.0x of base level scale
+        // Higher level might have smaller base scale (zoomed out)
+        let minZoom: CGFloat = 0.3
+        let maxZoom: CGFloat = 2.0
+        
+        let newScale = max(minZoom, min(maxZoom, cameraNode.xScale * scale))
+        cameraNode.xScale = newScale
+        cameraNode.yScale = newScale
     }
 }
