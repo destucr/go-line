@@ -1,4 +1,4 @@
-import SpriteKit
+internal import SpriteKit
 
 class GraphicsManager {
     
@@ -118,6 +118,49 @@ class GraphicsManager {
             path.closeSubpath()
             node = SKShapeNode(path: path)
             node.lineJoin = .round
+            
+        case .diamond:
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: 0, y: radius))
+            path.addLine(to: CGPoint(x: radius * 0.8, y: 0))
+            path.addLine(to: CGPoint(x: 0, y: -radius))
+            path.addLine(to: CGPoint(x: -radius * 0.8, y: 0))
+            path.closeSubpath()
+            node = SKShapeNode(path: path)
+            node.lineJoin = .round
+            
+        case .cross:
+            let path = CGMutablePath()
+            let w = radius * 0.4
+            let r = radius
+            path.move(to: CGPoint(x: -w, y: r))
+            path.addLine(to: CGPoint(x: w, y: r))
+            path.addLine(to: CGPoint(x: w, y: w))
+            path.addLine(to: CGPoint(x: r, y: w))
+            path.addLine(to: CGPoint(x: r, y: -w))
+            path.addLine(to: CGPoint(x: w, y: -w))
+            path.addLine(to: CGPoint(x: w, y: -r))
+            path.addLine(to: CGPoint(x: -w, y: -r))
+            path.addLine(to: CGPoint(x: -w, y: -w))
+            path.addLine(to: CGPoint(x: -r, y: -w))
+            path.addLine(to: CGPoint(x: -r, y: w))
+            path.addLine(to: CGPoint(x: -w, y: w))
+            path.closeSubpath()
+            node = SKShapeNode(path: path)
+            node.lineJoin = .round
+            
+        case .wedge:
+            let path = CGMutablePath()
+            // Teardrop shape
+            path.addArc(center: CGPoint(x: 0, y: -radius * 0.2), radius: radius * 0.8, startAngle: 0, endAngle: .pi, clockwise: false)
+            path.addLine(to: CGPoint(x: 0, y: radius))
+            path.closeSubpath()
+            node = SKShapeNode(path: path)
+            node.lineJoin = .round
+            
+        case .oval:
+            let rect = CGRect(x: -radius * 1.2, y: -radius * 0.7, width: radius * 2.4, height: radius * 1.4)
+            node = SKShapeNode(ellipseIn: rect)
         }
         
         node.fillColor = .white
@@ -133,7 +176,7 @@ class GraphicsManager {
         let rect = CGRect(x: -width/2, y: -height/2, width: width, height: height)
         let node = SKShapeNode(rect: rect, cornerRadius: 4)
         node.fillColor = color
-        node.strokeColor = .white
+        node.strokeColor = UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0) // Charcoal outline
         node.lineWidth = 2
         return node
     }
@@ -178,5 +221,41 @@ class GraphicsManager {
         
         container.zRotation = CGFloat.random(in: 0...(2 * .pi))
         return container
+    }
+    
+    static func createProgressBar(size: CGSize) -> (container: SKShapeNode, fill: SKShapeNode) {
+        let container = SKShapeNode(rectOf: size, cornerRadius: size.height/2)
+        container.fillColor = .white
+        container.strokeColor = .lightGray
+        container.lineWidth = 1
+        
+        let fill = SKShapeNode(rect: CGRect(x: -size.width/2, y: -size.height/2, width: 0, height: size.height), cornerRadius: size.height/2)
+        fill.fillColor = .systemGreen
+        fill.strokeColor = .clear
+        container.addChild(fill)
+        
+        return (container, fill)
+    }
+    
+    static func createConfettiEmitter() -> SKEmitterNode {
+        let emitter = SKEmitterNode()
+        emitter.particleBirthRate = 100
+        emitter.numParticlesToEmit = 50
+        emitter.particleLifetime = 2.0
+        emitter.particleSpeed = 150
+        emitter.particleAlpha = 1.0
+        emitter.particleAlphaSpeed = -0.5
+        emitter.particleScale = 0.5
+        emitter.particleRotation = 0
+        emitter.emissionAngleRange = .pi * 2
+        emitter.particleColorSequence = SKKeyframeSequence(keyframeValues: [UIColor.red, UIColor.blue, UIColor.green, UIColor.yellow], times: [0, 0.33, 0.66, 1.0])
+        
+        let circle = SKShapeNode(circleOfRadius: 4)
+        circle.fillColor = .white
+        if let texture = SKView().texture(from: circle) {
+            emitter.particleTexture = texture
+        }
+        
+        return emitter
     }
 }

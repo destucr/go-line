@@ -1,8 +1,8 @@
-# Metro Stitcher - PRD v1.1
+# Go Line - PRD v1.1
 
 ## Core Identity
 **Type**: iOS landscape transit management sim with embroidery aesthetics  
-**Goal**: Embroider a beautiful transit network via curved thread creation, train movement (shuttles), and passenger satisfaction (stitches).
+**Goal**: Sew a beautiful transit network through Go Line.
 
 ## Functional Requirements
 

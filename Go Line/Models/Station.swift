@@ -2,11 +2,18 @@ import CoreGraphics
 import Foundation
 
 enum StationType: Int, CaseIterable {
+    // Common
     case circle
     case triangle
     case square
+    
+    // Unique (Rares)
     case pentagon
     case star
+    case diamond // Gem
+    case cross
+    case wedge   // TearDrop
+    case oval
 }
 
 struct Passenger: Identifiable, Equatable {

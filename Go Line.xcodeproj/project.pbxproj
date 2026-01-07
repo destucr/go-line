@@ -7,26 +7,26 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		431AAFD12F0E448C0094962E /* go-line.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "go-line.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		431AAFD12F0E448C0094962E /* Go Line.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Go Line.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		431AAFE32F0E448D0094962E /* Exceptions for "go-line" folder in "go-line" target */ = {
+		431AAFE32F0E448D0094962E /* Exceptions for "Go Line" folder in "Go Line" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 431AAFD02F0E448C0094962E /* go-line */;
+			target = 431AAFD02F0E448C0094962E /* Go Line */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		431AAFD32F0E448C0094962E /* go-line */ = {
+		431AAFD32F0E448C0094962E /* Go Line */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				431AAFE32F0E448D0094962E /* Exceptions for "go-line" folder in "go-line" target */,
+				431AAFE32F0E448D0094962E /* Exceptions for "Go Line" folder in "Go Line" target */,
 			);
-			path = "go-line";
+			path = "Go Line";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,7 +45,7 @@
 		431AAFC82F0E448C0094962E = {
 			isa = PBXGroup;
 			children = (
-				431AAFD32F0E448C0094962E /* go-line */,
+				431AAFD32F0E448C0094962E /* Go Line */,
 				431AAFD22F0E448C0094962E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -53,7 +53,7 @@
 		431AAFD22F0E448C0094962E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				431AAFD12F0E448C0094962E /* go-line.app */,
+				431AAFD12F0E448C0094962E /* Go Line.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,10 +61,11 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		431AAFD02F0E448C0094962E /* go-line */ = {
+		431AAFD02F0E448C0094962E /* Go Line */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 431AAFE42F0E448D0094962E /* Build configuration list for PBXNativeTarget "go-line" */;
+			buildConfigurationList = 431AAFE42F0E448D0094962E /* Build configuration list for PBXNativeTarget "Go Line" */;
 			buildPhases = (
+				431AAFE92F0E448D0094962E /* SwiftLint */,
 				431AAFCD2F0E448C0094962E /* Sources */,
 				431AAFCE2F0E448C0094962E /* Frameworks */,
 				431AAFCF2F0E448C0094962E /* Resources */,
@@ -74,13 +75,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				431AAFD32F0E448C0094962E /* go-line */,
+				431AAFD32F0E448C0094962E /* Go Line */,
 			);
-			name = "go-line";
+			name = "Go Line";
 			packageProductDependencies = (
 			);
-			productName = "go-line";
-			productReference = 431AAFD12F0E448C0094962E /* go-line.app */;
+			productName = "Go Line";
+			productReference = 431AAFD12F0E448C0094962E /* Go Line.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -98,7 +99,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 431AAFCC2F0E448C0094962E /* Build configuration list for PBXProject "go-line" */;
+			buildConfigurationList = 431AAFCC2F0E448C0094962E /* Build configuration list for PBXProject "Go Line" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -112,7 +113,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				431AAFD02F0E448C0094962E /* go-line */,
+				431AAFD02F0E448C0094962E /* Go Line */,
 			);
 		};
 /* End PBXProject section */
@@ -126,6 +127,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		431AAFE92F0E448D0094962E /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint u003e/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		431AAFCD2F0E448C0094962E /* Sources */ = {
@@ -146,13 +168,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6PN64DQKLX;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "go-line/Info.plist";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Go Line/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -161,12 +182,17 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.destu.go-line";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				UIRequiresFullScreen = YES;
 			};
 			name = Debug;
 		};
@@ -178,13 +204,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6PN64DQKLX;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "go-line/Info.plist";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Go Line/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -193,12 +218,17 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.destu.go-line";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				UIRequiresFullScreen = YES;
 			};
 			name = Release;
 		};
@@ -326,7 +356,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		431AAFCC2F0E448C0094962E /* Build configuration list for PBXProject "go-line" */ = {
+		431AAFCC2F0E448C0094962E /* Build configuration list for PBXProject "Go Line" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				431AAFE72F0E448D0094962E /* Debug */,
@@ -335,7 +365,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		431AAFE42F0E448D0094962E /* Build configuration list for PBXNativeTarget "go-line" */ = {
+		431AAFE42F0E448D0094962E /* Build configuration list for PBXNativeTarget "Go Line" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				431AAFE52F0E448D0094962E /* Debug */,
