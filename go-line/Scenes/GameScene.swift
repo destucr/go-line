@@ -104,6 +104,7 @@ class GameScene: SKScene {
             spawnCityStations()
             showTutorialHint()
             updateLockedLines()
+            createSewingScraps()
             isCreated = true
         }
         layoutUI()
@@ -277,6 +278,18 @@ class GameScene: SKScene {
                 if station.overcrowdTimer >= maxOvercrowdTime {
                     triggerGameOver(reason: "Fabric Snapping!\nPattern Failure")
                 }
+                
+                // Shake and color stations in danger
+                if let node = stationNodes[station.id] {
+                    let shake = SKAction.sequence([
+                        SKAction.moveBy(x: 2, y: 0, duration: 0.05),
+                        SKAction.moveBy(x: -4, y: 0, duration: 0.05),
+                        SKAction.moveBy(x: 2, y: 0, duration: 0.05)
+                    ])
+                    if !node.hasActions() {
+                        node.run(shake)
+                    }
+                }
             } else {
                 // Recover slowly
                 station.overcrowdTimer = max(0, station.overcrowdTimer - dt)
@@ -367,22 +380,14 @@ class GameScene: SKScene {
             guard let fromPos = getStationPos(id: fromID),
                   let toPos = getStationPos(id: toID) else { continue }
             
-            let segmentDist = hypot(toPos.x - fromPos.x, toPos.y - fromPos.y)
             let distanceTravelled = speed * CGFloat(dt)
-            let progressDelta = distanceTravelled / segmentDist
             
+            // Total distance along structured path
+            let pathPoints = getStructuredPathPoints(from: fromPos, to: toPos)
+            let totalPathDist = calculateTotalDistance(points: pathPoints)
+            
+            let progressDelta = distanceTravelled / totalPathDist
             train.progress += progressDelta
-            
-            // Unified Curved Position Calculation
-            let controlPoint = getControlPoint(from: fromPos, to: toPos)
-            
-            // Quadratic Bezier Formula: (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
-            let t = train.progress
-            let invT = 1.0 - t
-            let posX = invT * invT * fromPos.x + 2 * invT * t * controlPoint.x + t * t * toPos.x
-            let posY = invT * invT * fromPos.y + 2 * invT * t * controlPoint.y + t * t * toPos.y
-            
-            train.position = CGPoint(x: posX, y: posY)
             
             if train.progress >= 1.0 {
                 train.progress = 0.0
@@ -395,6 +400,8 @@ class GameScene: SKScene {
                 } else if train.currentSegmentIndex == 0 {
                     train.isReversed = false
                 }
+            } else {
+                train.position = getPointOnPath(points: pathPoints, progress: train.progress)
             }
             
             trains[i] = train
@@ -1006,11 +1013,9 @@ class GameScene: SKScene {
     private func updateDraftLine(from startPos: CGPoint, to currentPos: CGPoint) {
         guard let draft = currentDraftLine else { return }
         
-        let controlPoint = getControlPoint(from: startPos, to: currentPos)
+        let points = getStructuredPathPoints(from: startPos, to: currentPos)
+        let path = createRoundedPath(points: points, radius: 20)
         
-        let path = CGMutablePath()
-        path.move(to: startPos)
-        path.addQuadCurve(to: currentPos, control: controlPoint)
         draft.path = path.copy(dashingWithPhase: 0, lengths: [6, 4])
     }
     
@@ -1080,11 +1085,8 @@ class GameScene: SKScene {
         let startPos = startNode.position
         let endPos = endNode.position
         
-        let controlPoint = getControlPoint(from: startPos, to: endPos)
-        
-        let path = CGMutablePath()
-        path.move(to: startPos)
-        path.addQuadCurve(to: endPos, control: controlPoint)
+        let points = getStructuredPathPoints(from: startPos, to: endPos)
+        let path = createRoundedPath(points: points, radius: 20)
         
         // Base thick thread
         let lineSeg = SKShapeNode(path: path)
@@ -1117,26 +1119,75 @@ class GameScene: SKScene {
         addChild(lineSeg)
     }
     
-    // MARK: - Standardized Curve Logic
-    private func getControlPoint(from: CGPoint, to: CGPoint) -> CGPoint {
-        let dx = to.x - from.x
-        let dy = to.y - from.y
-        let dist = hypot(dx, dy)
+    private func createSewingScraps() {
+        for _ in 0..<8 {
+            let scrap = GraphicsManager.createScrapNode()
+            scrap.position = CGPoint(
+                x: CGFloat.random(in: 100...size.width-100),
+                y: CGFloat.random(in: 100...size.height-100)
+            )
+            scrap.zPosition = -50
+            addChild(scrap)
+        }
+    }
+    
+    // MARK: - Structured Path Logic (Metro Style)
+    
+    private func getStructuredPathPoints(from: CGPoint, to: CGPoint) -> [CGPoint] {
+        // L-Shape connection: H then V or V then H
+        // We pick the one that creates a more natural bend
+        let midX = from.x
+        let midY = to.y
+        return [from, CGPoint(x: midX, y: midY), to]
+    }
+    
+    private func createRoundedPath(points: [CGPoint], radius: CGFloat) -> CGPath {
+        let path = CGMutablePath()
+        guard points.count >= 2 else { return path }
         
-        // Normalize mid-point
-        let midX = (from.x + to.x) / 2
-        let midY = (from.y + to.y) / 2
+        path.move(to: points[0])
         
-        // To make it look like a metro map, we want more structured bends.
-        // Instead of a random perpendicular offset, let's bias it based on the primary axis.
-        // This creates a more 'Transit-like' purposeful curve.
+        for i in 1..<points.count {
+            if i < points.count - 1 {
+                path.addArc(tangent1End: points[i], tangent2End: points[i+1], radius: radius)
+            } else {
+                path.addLine(to: points[i])
+            }
+        }
         
-        let curveScale: CGFloat = min(dist * 0.2, 50.0) // Scale curve with distance but cap it
+        return path
+    }
+    
+    private func calculateTotalDistance(points: [CGPoint]) -> CGFloat {
+        var total: CGFloat = 0
+        for i in 0..<points.count-1 {
+            total += hypot(points[i+1].x - points[i].x, points[i+1].y - points[i].y)
+        }
+        // Simplify: Rounded corners reduce distance slightly, but we ignore for simplicity
+        return total
+    }
+    
+    private func getPointOnPath(points: [CGPoint], progress: CGFloat) -> CGPoint {
+        guard points.count >= 2 else { return points.first ?? .zero }
+        if progress <= 0 { return points.first! }
+        if progress >= 1 { return points.last! }
         
-        // Perpendicular vector
-        let normalX = -dy / dist
-        let normalY = dx / dist
+        let total = calculateTotalDistance(points: points)
+        var targetDist = total * progress
         
-        return CGPoint(x: midX + normalX * curveScale, y: midY + normalY * curveScale)
+        for i in 0..<points.count-1 {
+            let p1 = points[i]
+            let p2 = points[i+1]
+            let segmentDist = hypot(p2.x - p1.x, p2.y - p1.y)
+            
+            if targetDist <= segmentDist {
+                let t = targetDist / segmentDist
+                return CGPoint(x: p1.x + (p2.x - p1.x) * t,
+                               y: p1.y + (p2.y - p1.y) * t)
+            }
+            targetDist -= segmentDist
+        }
+        
+        return points.last!
     }
 }

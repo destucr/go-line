@@ -137,4 +137,46 @@ class GraphicsManager {
         node.lineWidth = 2
         return node
     }
+    
+    static func createScrapNode() -> SKNode {
+        let container = SKNode()
+        container.alpha = 0.2
+        
+        // Random scrap types (thread snips, small patches)
+        let type = Int.random(in: 0...2)
+        switch type {
+        case 0:
+            // Crossed Threads
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: -10, y: -5))
+            path.addLine(to: CGPoint(x: 10, y: 5))
+            path.move(to: CGPoint(x: -5, y: 10))
+            path.addLine(to: CGPoint(x: 5, y: -10))
+            let lines = SKShapeNode(path: path)
+            lines.strokeColor = .gray
+            lines.lineWidth = 1
+            container.addChild(lines)
+        case 1:
+            // Small Fabric Patch (Dashed square)
+            let rect = CGRect(x: -8, y: -8, width: 16, height: 16)
+            let patch = SKShapeNode(rect: rect, cornerRadius: 2)
+            patch.strokeColor = .lightGray
+            patch.lineWidth = 1
+            if let dashed = patch.path?.copy(dashingWithPhase: 0, lengths: [2, 2]) {
+                patch.path = dashed
+            }
+            container.addChild(patch)
+        default:
+            // Loose Loop
+            let path = CGMutablePath()
+            path.addEllipse(in: CGRect(x: -6, y: -6, width: 12, height: 12))
+            let loop = SKShapeNode(path: path)
+            loop.strokeColor = .gray
+            loop.lineWidth = 0.5
+            container.addChild(loop)
+        }
+        
+        container.zRotation = CGFloat.random(in: 0...(2 * .pi))
+        return container
+    }
 }
