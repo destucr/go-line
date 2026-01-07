@@ -2,12 +2,12 @@
 
 **Connect the City.**
 
-Go Line is a zen transit management simulator with a minimalist paper and thread aesthetic. Draw a network of colorful transit lines to transport passengers across a textured map, managing efficiency and tension as your city grows.
+Go Line is a zen transit management simulator with a minimalist, industrial paper-and-thread aesthetic. Draw a network of colorful transit lines to transport passengers across a textured map, managing efficiency and tension as your city grows.
 
-![Gameplay Preview](screenshots/gameplay.png)
+![Gameplay Preview](screenshots/gameplay-full.PNG)
 
 ## ✨ Core Identity
-Go Line blends the strategic depth of transit puzzles with a clean, minimalist art style. Every line you draw is a "stitch" on the map, and every delivery contributes to the overall stability of your urban network.
+Go Line blends the strategic depth of transit puzzles with a clean, industrial art style. Every line you draw is a "stitch" on the map, and every delivery contributes to the overall stability of your urban network.
 
 ## 🧵 Key Features
 
@@ -23,7 +23,11 @@ Spend your earned **Thread** (Currency) in the shop to improve your fleet:
 - ⚡ **Faster Needle:** Boost train speed to reduce passenger wait times.
 - 💪 **Network Strength:** Toughen your network to handle higher tension and overcrowding levels.
 
-### 4. Smooth Geometry
+### 4. Interactive Camera & UI
+- **Industrial UI:** A revamped, tactile interface featuring metallic textures, progress bars, and clean typography.
+- **Pinch-to-Zoom:** Freely explore your growing city network with intuitive pinch and pan gestures.
+
+### 5. Smooth Geometry
 Draw curved, "stitched" paths between stations using an intuitive touch-drag interface. The game uses quadratic Bezier curves and dashed line patterns to create a clean, handcrafted look.
 
 ## 🕹️ How to Play
@@ -34,9 +38,9 @@ Draw curved, "stitched" paths between stations using an intuitive touch-drag int
 
 ## 🖼️ Gallery
 
-| Menu | Shop | Guide |
+| Menu | Shop | Gameplay |
 | :---: | :---: | :---: |
-| ![Menu](screenshots/menu.png) | ![Shop](screenshots/shop.png) | ![Guide](screenshots/guide.png) |
+| ![Menu](screenshots/homescreen.PNG) | ![Shop](screenshots/upgrade-shop.PNG) | ![Guide](screenshots/gameplay-full.PNG) |
 
 ## 🛠️ Technical Stack
 - **Engine:** SpriteKit (2D Game Engine)

@@ -200,6 +200,18 @@ extension GameScene {
                 connector.zRotation = context.train.isReversed ? cState.angle + .pi : cState.angle
                 connector.zPosition = -1
                 
+                // Smooth Fade for connector
+                var cAlpha: CGFloat = 1.0
+                for sDist in context.stationDistances {
+                    let d = abs(connectorDist - sDist)
+                    if d < 20 {
+                        // Smooth cubic fade
+                        let t = d / 20.0
+                        cAlpha = min(cAlpha, t * t * (3 - 2 * t))
+                    }
+                }
+                connector.alpha = cAlpha
+                
                 node?.addChild(connector)
             }
         }
@@ -207,6 +219,30 @@ extension GameScene {
         let cNode = GraphicsManager.createTrainShape(color: context.line.color)
         cNode.position = state.point
         cNode.zRotation = context.train.isReversed ? state.angle + .pi : state.angle
+        
+        // Professional Smooth Transition (Scale + Alpha)
+        var carriageAlpha: CGFloat = 1.0
+        var carriageScale: CGFloat = 1.0
+        
+        for sDist in context.stationDistances {
+            let d = abs(targetDist - sDist)
+            if d < 25 {
+                // Extended range for smoother feel (25pt)
+                // Normalize t from 0 (center) to 1 (edge)
+                let t = max(0, min(1.0, d / 25.0))
+                
+                // Ease In Cubic for Alpha: Starts slow, speeds up
+                // t=0 -> alpha=0, t=1 -> alpha=1
+                let smoothT = t * t * (3 - 2 * t)
+                carriageAlpha = min(carriageAlpha, 0.2 + 0.8 * smoothT) // Never fully invisible (0.2 min)
+                
+                // Scale Down slightly: 80% size at center
+                carriageScale = min(carriageScale, 0.85 + 0.15 * smoothT)
+            }
+        }
+        
+        cNode.alpha = carriageAlpha
+        cNode.setScale(carriageScale)
         
         node?.addChild(cNode)
         
