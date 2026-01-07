@@ -11,7 +11,11 @@ class GuideScene: SKScene {
     private var isCreated = false
     
     override func didMove(to view: SKView) {
-        backgroundColor = .white
+        // Background
+        let bg = GraphicsManager.createBackground(size: size)
+        bg.position = CGPoint(x: size.width/2, y: size.height/2)
+        addChild(bg)
+        
         if !isCreated {
             createContent()
             isCreated = true
@@ -21,6 +25,12 @@ class GuideScene: SKScene {
     
     override func didChangeSize(_ oldSize: CGSize) {
         super.didChangeSize(oldSize)
+        // Update background size
+        if let bg = children.first(where: { $0.zPosition == -100 }) as? SKSpriteNode {
+            bg.size = size
+            bg.position = CGPoint(x: size.width/2, y: size.height/2)
+        }
+        
         if isCreated {
             layoutUI()
         }
@@ -30,7 +40,7 @@ class GuideScene: SKScene {
         // Title
         title.fontName = "AvenirNext-Bold"
         title.fontSize = 40
-        title.fontColor = .black
+        title.fontColor = .darkGray
         addChild(title)
         
         // Instructions
@@ -53,9 +63,8 @@ class GuideScene: SKScene {
         // Back Button
         let container = SKNode()
         container.name = "back_btn"
-        let bg = SKShapeNode(rectOf: CGSize(width: 120, height: 50), cornerRadius: 8)
-        bg.fillColor = .systemBlue
-        bg.strokeColor = .clear
+        
+        let bg = GraphicsManager.createTagNode(size: CGSize(width: 120, height: 50))
         bg.name = "back_btn"
         container.addChild(bg)
         
@@ -63,7 +72,7 @@ class GuideScene: SKScene {
         btnLabel.fontName = "AvenirNext-Bold"
         btnLabel.fontSize = 20
         btnLabel.verticalAlignmentMode = .center
-        btnLabel.fontColor = .white
+        btnLabel.fontColor = .darkGray
         btnLabel.name = "back_btn"
         container.addChild(btnLabel)
         
@@ -92,7 +101,22 @@ class GuideScene: SKScene {
         let name = node.name ?? node.parent?.name
         
         if name == "back_btn" {
-            onBackTapped?()
+            let buttonNode = (node.name == name) ? node : node.parent!
+            animateButtonPress(buttonNode) { [weak self] in
+                self?.onBackTapped?()
+            }
+        }
+    }
+    
+    private func animateButtonPress(_ node: SKNode, completion: @escaping () -> Void) {
+        run(SKAction.playSoundFileNamed("soft_click.mp3", waitForCompletion: false))
+        
+        let shrink = SKAction.scale(to: 0.9, duration: 0.1)
+        let grow = SKAction.scale(to: 1.0, duration: 0.1)
+        let sequence = SKAction.sequence([shrink, grow])
+        
+        node.run(sequence) {
+            completion()
         }
     }
 }

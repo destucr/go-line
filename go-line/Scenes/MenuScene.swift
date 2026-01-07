@@ -13,7 +13,11 @@ class MenuScene: SKScene {
     private var isCreated = false
     
     override func didMove(to view: SKView) {
-        backgroundColor = .white
+        // Background
+        let bg = GraphicsManager.createBackground(size: size)
+        bg.position = CGPoint(x: size.width/2, y: size.height/2)
+        addChild(bg)
+        
         if !isCreated {
             createMenuUI()
             isCreated = true
@@ -23,6 +27,12 @@ class MenuScene: SKScene {
     
     override func didChangeSize(_ oldSize: CGSize) {
         super.didChangeSize(oldSize)
+        // Update background size if needed
+        if let bg = children.first(where: { $0.zPosition == -100 }) as? SKSpriteNode {
+            bg.size = size
+            bg.position = CGPoint(x: size.width/2, y: size.height/2)
+        }
+        
         if isCreated {
             layoutUI()
         }
@@ -32,7 +42,7 @@ class MenuScene: SKScene {
         // Title
         titleNode.fontName = "AvenirNext-Bold"
         titleNode.fontSize = 50
-        titleNode.fontColor = .black
+        titleNode.fontColor = .darkGray // Changed to match theme better
         addChild(titleNode)
         
         // Play Button
@@ -58,16 +68,14 @@ class MenuScene: SKScene {
         let container = SKNode()
         container.name = name
         
-        let background = SKShapeNode(rectOf: CGSize(width: 200, height: 60), cornerRadius: 10)
-        background.fillColor = .black
-        background.strokeColor = .clear
+        let background = GraphicsManager.createTagNode(size: CGSize(width: 200, height: 60))
         background.name = name // Hit test matches name
         container.addChild(background)
         
         let label = SKLabelNode(text: text)
         label.fontName = "AvenirNext-Bold"
         label.fontSize = 24
-        label.fontColor = .white
+        label.fontColor = .darkGray
         label.verticalAlignmentMode = .center
         label.name = name
         container.addChild(label)
@@ -80,13 +88,29 @@ class MenuScene: SKScene {
         let location = touch.location(in: self)
         let touchedNode = atPoint(location)
         
-        // Check node or its parent (in case label is clicked)
         let name = touchedNode.name ?? touchedNode.parent?.name
         
-        if name == "play_btn" {
-            onPlayButtonTapped?()
-        } else if name == "guide_btn" {
-            onGuideButtonTapped?()
+        if name == "play_btn" || name == "guide_btn" {
+            let buttonNode = (touchedNode.name == name) ? touchedNode : touchedNode.parent!
+            animateButtonPress(buttonNode) { [weak self] in
+                if name == "play_btn" {
+                    self?.onPlayButtonTapped?()
+                } else if name == "guide_btn" {
+                    self?.onGuideButtonTapped?()
+                }
+            }
+        }
+    }
+    
+    private func animateButtonPress(_ node: SKNode, completion: @escaping () -> Void) {
+        run(SKAction.playSoundFileNamed("soft_click.mp3", waitForCompletion: false))
+        
+        let shrink = SKAction.scale(to: 0.9, duration: 0.1)
+        let grow = SKAction.scale(to: 1.0, duration: 0.1)
+        let sequence = SKAction.sequence([shrink, grow])
+        
+        node.run(sequence) {
+            completion()
         }
     }
 }

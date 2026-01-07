@@ -76,7 +76,7 @@ class ViewController: UIViewController {
     }
     
     private func present(scene: SKScene) {
-        let transition = SKTransition.crossFade(withDuration: 0.5)
+        let transition = SKTransition.crossFade(withDuration: 0.3)
         skView.presentScene(scene, transition: transition)
     }
 

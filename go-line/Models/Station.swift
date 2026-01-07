@@ -5,7 +5,14 @@ enum StationType: Int, CaseIterable {
     case circle
     case triangle
     case square
-    // Add more types as game progresses
+    case pentagon
+    case star
+}
+
+struct Passenger: Identifiable, Equatable {
+    let id: UUID
+    let destinationType: StationType
+    let spawnTime: TimeInterval
 }
 
 struct Station: Identifiable, Equatable {
@@ -13,16 +20,14 @@ struct Station: Identifiable, Equatable {
     var position: CGPoint
     var type: StationType
     var passengers: [Passenger] = []
+    var maxCapacity: Int = 6
+    var overcrowdTimer: TimeInterval = 0.0
     
-    // For Equatable
+    var isOvercrowded: Bool {
+        return passengers.count > maxCapacity
+    }
+    
     static func == (lhs: Station, rhs: Station) -> Bool {
         return lhs.id == rhs.id
     }
-}
-
-// Placeholder for Passenger until fully implemented
-struct Passenger {
-    let id: UUID
-    let destinationType: StationType
-    // Add spawn time, happiness, etc. later
 }

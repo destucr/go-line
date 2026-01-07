@@ -309,7 +309,51 @@ class GameScene: SKScene {
 }
 ```
 
-### 8. Performance Optimization
+### 8. Curved Path Logistics (Bezier)
+
+When moving objects along curves (e.g., threads, routes):
+
+```swift
+func calculateBezierPoint(t: CGFloat, p0: CGPoint, p1: CGPoint, p2: CGPoint) -> CGPoint {
+    let invT = 1.0 - t
+    let x = invT * invT * p0.x + 2 * invT * t * p1.x + t * t * p2.x
+    let y = invT * invT * p0.y + 2 * invT * t * p1.y + t * t * p2.y
+    return CGPoint(x: x, y: y)
+}
+
+// Control Point Calculation (Curved Offset)
+func getControlPoint(from: CGPoint, to: CGPoint, offset: CGFloat) -> CGPoint {
+    let mid = CGPoint(x: (from.x + to.x) / 2, y: (from.y + to.y) / 2)
+    let dx = to.x - from.x
+    let dy = to.y - from.y
+    let dist = hypot(dx, dy)
+    let normalX = -dy / dist
+    let normalY = dx / dist
+    return CGPoint(x: mid.x + normalX * offset, y: mid.y + normalY * offset)
+}
+```
+
+### 9. Custom Thematic Rendering (Embroidery Example)
+
+```swift
+static func createCurvedThread(path: CGPath, color: UIColor) -> SKShapeNode {
+    let thread = SKShapeNode(path: path)
+    thread.strokeColor = color
+    thread.lineWidth = 5
+    thread.lineCap = .round
+    
+    // Add Stitch Texture
+    let dashedPath = path.copy(dashingWithPhase: 0, lengths: [6, 4])
+    let stitches = SKShapeNode(path: dashedPath)
+    stitches.strokeColor = color.withAlphaComponent(0.5)
+    stitches.lineWidth = 2
+    thread.addChild(stitches)
+    
+    return thread
+}
+```
+
+### 10. Performance Optimization
 
 **Target Metrics**:
 - 60fps on iPhone 11+ (check Instruments)
