@@ -70,13 +70,12 @@ extension GameScene {
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         resetDraft()
         isPanning = false
-    }    
+    }
+    
     // MARK: - Interaction Helpers
     func getStationAt(_ location: CGPoint) -> (UUID, CGPoint)? {
-        for station in gameStations {
-            if hypot(station.position.x - location.x, station.position.y - location.y) < touchAreaRadius {
-                return (station.id, station.position)
-            }
+        for station in gameStations where hypot(station.position.x - location.x, station.position.y - location.y) < touchAreaRadius {
+            return (station.id, station.position)
         }
         return nil
     }
@@ -196,7 +195,6 @@ extension GameScene {
         addChild(lineSeg)
     }
     
-    
     // MARK: - Geometry
     func getStructuredPathPoints(from: CGPoint, to: CGPoint) -> [CGPoint] {
         // Metro Style: Symmetric Octolinear with Hysteresis
@@ -259,9 +257,9 @@ extension GameScene {
             path.addLine(to: points[1])
         } else {
             for i in 1..<points.count - 1 {
-                let p0 = points[i-1]
+                let p0 = points[i - 1]
                 let p1 = points[i]
-                let p2 = points[i+1]
+                let p2 = points[i + 1]
                 
                 // Calculate distances to clamp radius
                 let d1 = hypot(p1.x - p0.x, p1.y - p0.y)
@@ -280,8 +278,8 @@ extension GameScene {
     
     func calculateTotalDistance(points: [CGPoint]) -> CGFloat {
         var total: CGFloat = 0
-        for i in 0..<points.count-1 {
-            total += hypot(points[i+1].x - points[i].x, points[i+1].y - points[i].y)
+        for i in 0..<points.count - 1 {
+            total += hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y)
         }
         return total
     }
@@ -294,9 +292,9 @@ extension GameScene {
         let total = calculateTotalDistance(points: sampled)
         var targetDist = total * roundedProgress
         
-        for i in 0..<sampled.count-1 {
+        for i in 0..<sampled.count - 1 {
             let p1 = sampled[i]
-            let p2 = sampled[i+1]
+            let p2 = sampled[i + 1]
             let segDist = hypot(p2.x - p1.x, p2.y - p1.y)
             
             if targetDist <= segDist {
@@ -375,7 +373,7 @@ extension GameScene {
         
         for i in 0..<stationIDs.count - 1 {
             guard let p1 = getStationPos(id: stationIDs[i]),
-                  let p2 = getStationPos(id: stationIDs[i+1]) else { continue }
+                  let p2 = getStationPos(id: stationIDs[i + 1]) else { continue }
             
             let segmentPoints = getStructuredPathPoints(from: p1, to: p2)
             let sampled = getSampledPointsFromPath(points: segmentPoints)
@@ -393,16 +391,16 @@ extension GameScene {
         guard points.count >= 2 else { return nil }
         
         var remainingDist = distance
-        if distance <= 0 { 
+        if distance <= 0 {
             let p1 = points[0]
             let p2 = points[1]
             let angle = atan2(p2.y - p1.y, p2.x - p1.x)
-            return (p1, angle) 
+            return (p1, angle)
         }
         
         for i in 0..<points.count - 1 {
             let p1 = points[i]
-            let p2 = points[i+1]
+            let p2 = points[i + 1]
             let d = hypot(p2.x - p1.x, p2.y - p1.y)
             
             if remainingDist <= d {

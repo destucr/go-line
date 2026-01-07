@@ -37,7 +37,7 @@ extension GameScene {
                 // Alert icon
                 let alert = SKLabelNode(text: "!")
                 alert.name = "overcrowd_alert"
-                alert.fontName = "ChalkboardSE-Bold"
+                alert.fontName = "AvenirNext-Bold"
                 alert.fontSize = 20
                 alert.fontColor = .systemRed
                 alert.position = CGPoint(x: 0, y: stationRadius + 15)
@@ -84,11 +84,9 @@ extension GameScene {
     
     func updateTrainVisuals() {
         let currentTrainIDs = Set(trains.map { $0.id })
-        for (id, node) in trainNodes {
-            if !currentTrainIDs.contains(id) {
-                node.removeFromParent()
-                trainNodes.removeValue(forKey: id)
-            }
+        for (id, node) in trainNodes where !currentTrainIDs.contains(id) {
+            node.removeFromParent()
+            trainNodes.removeValue(forKey: id)
         }
         
         for train in trains {
@@ -97,7 +95,7 @@ extension GameScene {
             var node = trainNodes[train.id]
             if node == nil {
                 node = SKNode() // Use generic SKNode as container
-                node?.zPosition = 20
+                node?.zPosition = 5
                 addChild(node!)
                 trainNodes[train.id] = node
             }
@@ -107,26 +105,42 @@ extension GameScene {
             let pathPoints = getLinePathPoints(line: line)
             guard pathPoints.count >= 2 else { continue }
             
-            // Calculate segment lengths for total distance mapping
+            // Calculate segment lengths and station distances for alpha animation
             var segmentLengths: [CGFloat] = []
+            var stationDistances: [CGFloat] = [0]
+            var currentTotal: CGFloat = 0
             for i in 0..<line.stations.count - 1 {
                 guard let p1 = getStationPos(id: line.stations[i]),
-                      let p2 = getStationPos(id: line.stations[i+1]) else {
+                      let p2 = getStationPos(id: line.stations[i + 1]) else {
                     segmentLengths.append(0)
                     continue
                 }
                 let segPoints = getStructuredPathPoints(from: p1, to: p2)
-                segmentLengths.append(calculateTotalDistance(points: segPoints))
+                let d = calculateTotalDistance(points: segPoints)
+                segmentLengths.append(d)
+                currentTotal += d
+                stationDistances.append(currentTotal)
             }
             
             // Distance of head from station 0
             var headDist: CGFloat = 0
             if !train.isReversed {
-                for i in 0..<train.currentSegmentIndex { headDist += segmentLengths[i] }
-                headDist += train.progress * segmentLengths[train.currentSegmentIndex]
+                for i in 0..<train.currentSegmentIndex where i < segmentLengths.count {
+                    headDist += segmentLengths[i]
+                }
+                if train.currentSegmentIndex < segmentLengths.count {
+                    headDist += train.progress * segmentLengths[train.currentSegmentIndex]
+                }
             } else {
-                for i in 0..<train.currentSegmentIndex - 1 { headDist += segmentLengths[i] }
-                headDist += (1.0 - train.progress) * segmentLengths[train.currentSegmentIndex - 1]
+                let segmentIndex = train.currentSegmentIndex - 1
+                if segmentIndex >= 0 {
+                    for i in 0..<segmentIndex where i < segmentLengths.count {
+                        headDist += segmentLengths[i]
+                    }
+                    if segmentIndex < segmentLengths.count {
+                        headDist += (1.0 - train.progress) * segmentLengths[segmentIndex]
+                    }
+                }
             }
             
             let carriageWidth: CGFloat = 28
@@ -143,7 +157,7 @@ extension GameScene {
                 
                 // Connector (except for the first carriage)
                 if i > 0 {
-                    let connectorOffset = distOffset - (carriageWidth/2 + spacing/2)
+                    let connectorOffset = distOffset - (carriageWidth / 2 + spacing / 2)
                     let connectorDist = train.isReversed ? (headDist + connectorOffset) : (headDist - connectorOffset)
                     if let cState = getPointAtDistance(points: pathPoints, distance: connectorDist) {
                         let connector = SKShapeNode(rectOf: CGSize(width: spacing + 2, height: 4), cornerRadius: 1)
@@ -152,6 +166,15 @@ extension GameScene {
                         connector.position = cState.point
                         connector.zRotation = train.isReversed ? cState.angle + .pi : cState.angle
                         connector.zPosition = -1
+                        
+                        // Animate connector alpha
+                        var cAlpha: CGFloat = 1.0
+                        for sDist in stationDistances {
+                            let d = abs(connectorDist - sDist)
+                            if d < 20 { cAlpha = max(0, (d - 5) / 15) }
+                        }
+                        connector.alpha = cAlpha
+                        
                         node?.addChild(connector)
                     }
                 }
@@ -159,20 +182,31 @@ extension GameScene {
                 let cNode = GraphicsManager.createTrainShape(color: line.color)
                 cNode.position = state.point
                 cNode.zRotation = train.isReversed ? state.angle + .pi : state.angle
+                
+                // Animate carriage alpha based on distance to any station center
+                var carriageAlpha: CGFloat = 1.0
+                for sDist in stationDistances {
+                    let d = abs(targetDist - sDist)
+                    if d < 20 {
+                        // Fully hidden when within 5px of center, fades out over the 15px leading to it
+                        carriageAlpha = min(carriageAlpha, max(0, (d - 5) / 15))
+                    }
+                }
+                cNode.alpha = carriageAlpha
+                
                 node?.addChild(cNode)
                 
                 // Passengers indicators inside carriages
                 let startIdx = i * 6
                 let endIdx = min(startIdx + 6, train.passengers.count)
                 if startIdx < train.passengers.count {
-                    let carriagePassengers = train.passengers[startIdx..<endIdx]
+                    let carriagePassengers = Array(train.passengers[startIdx..<endIdx])
                     let pSpacing: CGFloat = 4.0
                     for localIdx in 0..<carriagePassengers.count {
-                        let pDot = SKShapeNode(circleOfRadius: 1.5)
-                        pDot.fillColor = .white
-                        pDot.strokeColor = .clear
-                        pDot.position = CGPoint(x: CGFloat(localIdx) * pSpacing - 10, y: -2)
-                        cNode.addChild(pDot)
+                        let passenger = carriagePassengers[localIdx]
+                        let pShape = GraphicsManager.createStationShape(type: passenger.destinationType, radius: 2.5, lineWidth: 1.0)
+                        pShape.position = CGPoint(x: CGFloat(localIdx) * pSpacing - 10, y: -2)
+                        cNode.addChild(pShape)
                     }
                 }
             }

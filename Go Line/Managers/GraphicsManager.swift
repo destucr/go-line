@@ -38,7 +38,7 @@ class GraphicsManager {
     }
     
     static func createTagNode(size: CGSize) -> SKShapeNode {
-        let rect = CGRect(origin: CGPoint(x: -size.width/2, y: -size.height/2), size: size)
+        let rect = CGRect(origin: CGPoint(x: -size.width / 2, y: -size.height / 2), size: size)
         let node = SKShapeNode(rect: rect, cornerRadius: 4) // Sharper industrial radius
         node.fillColor = UIColor(white: 0.1, alpha: 1.0)
         node.strokeColor = UIColor(white: 0.3, alpha: 1.0)
@@ -47,14 +47,14 @@ class GraphicsManager {
         return node
     }
     
-    static func createStationShape(type: StationType, radius: CGFloat) -> SKShapeNode {
+    static func createStationShape(type: StationType, radius: CGFloat, lineWidth: CGFloat = 4) -> SKShapeNode {
         let node: SKShapeNode
         
         switch type {
         case .circle:
             node = SKShapeNode(circleOfRadius: radius)
         case .square:
-            let rect = CGRect(x: -radius, y: -radius, width: radius*2, height: radius*2)
+            let rect = CGRect(x: -radius, y: -radius, width: radius * 2, height: radius * 2)
             node = SKShapeNode(rect: rect, cornerRadius: 4)
         case .triangle:
             let path = CGMutablePath()
@@ -71,12 +71,11 @@ class GraphicsManager {
             for i in 0..<5 {
                 let angle = CGFloat(i) * (2 * .pi / 5) + .pi / 2
                 let point = CGPoint(x: cos(angle) * radius, y: sin(angle) * radius)
-                if i == 0 { path.move(to: point) }
-                else { path.addLine(to: point) }
+                if i == 0 { path.move(to: point) } else { path.addLine(to: point) }
             }
             path.closeSubpath()
             node = SKShapeNode(path: path)
-            
+
         case .star:
             let path = CGMutablePath()
             let outerRadius = radius
@@ -85,8 +84,7 @@ class GraphicsManager {
                 let angle = CGFloat(i) * (2 * .pi / 10) + .pi / 2
                 let r = (i % 2 == 0) ? outerRadius : innerRadius
                 let point = CGPoint(x: cos(angle) * r, y: sin(angle) * r)
-                if i == 0 { path.move(to: point) }
-                else { path.addLine(to: point) }
+                if i == 0 { path.move(to: point) } else { path.addLine(to: point) }
             }
             path.closeSubpath()
             node = SKShapeNode(path: path)
@@ -133,7 +131,7 @@ class GraphicsManager {
         
         node.fillColor = .white
         node.strokeColor = UIColor(white: 0.1, alpha: 1.0)
-        node.lineWidth = 4
+        node.lineWidth = lineWidth
         
         return node
     }
@@ -141,14 +139,14 @@ class GraphicsManager {
     static func createTrainShape(color: UIColor) -> SKShapeNode {
         let width: CGFloat = 28
         let height: CGFloat = 16
-        let rect = CGRect(x: -width/2, y: -height/2, width: width, height: height)
+        let rect = CGRect(x: -width / 2, y: -height / 2, width: width, height: height)
         let node = SKShapeNode(rect: rect, cornerRadius: 3)
         node.fillColor = color
         node.strokeColor = .white
         node.lineWidth = 2
         
         // Add a subtle "window" or detail to the train
-        let window = SKShapeNode(rect: CGRect(x: -width/2 + 4, y: -height/2 + 3, width: width - 8, height: height - 6), cornerRadius: 1)
+        let window = SKShapeNode(rect: CGRect(x: -width / 2 + 4, y: -height / 2 + 3, width: width - 8, height: height - 6), cornerRadius: 1)
         window.fillColor = UIColor.white.withAlphaComponent(0.3)
         window.strokeColor = .clear
         node.addChild(window)
@@ -162,7 +160,7 @@ class GraphicsManager {
         container.strokeColor = UIColor(white: 0.3, alpha: 1.0)
         container.lineWidth = 1
         
-        let fill = SKShapeNode(rect: CGRect(x: -size.width/2, y: -size.height/2, width: 0, height: size.height), cornerRadius: 0)
+        let fill = SKShapeNode(rect: CGRect(x: -size.width / 2, y: -size.height / 2, width: 0, height: size.height), cornerRadius: 0)
         fill.fillColor = .systemOrange // High visibility industrial orange
         fill.strokeColor = .clear
         container.addChild(fill)
@@ -198,7 +196,7 @@ class GraphicsManager {
         let node = SKShapeNode(rectOf: size, cornerRadius: 2)
         node.fillColor = UIColor(white: 0.9, alpha: 0.3)
         node.strokeColor = .clear
-        node.zRotation = CGFloat.random(in: 0...(.pi * 2))
+        node.zRotation = CGFloat.random(in: 0...( .pi * 2))
         return node
     }
 }

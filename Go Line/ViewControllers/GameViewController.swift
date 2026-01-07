@@ -6,6 +6,7 @@ class GameViewController: UIViewController {
     
     // SwiftUI Hosting
     private var hudHostingController: UIHostingController<GameHUDView>?
+    private var selectionHostingController: UIHostingController<LineSelectionView>?
     
     var onExitTapped: (() -> Void)?
     
@@ -13,45 +14,24 @@ class GameViewController: UIViewController {
     private var gameScene: GameScene?
     private var dayProgress: Float = 0.0
     
-    // HUD Elements
-    private let lineSelectionStack: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.spacing = 15
-        stack.distribution = .fillEqually
-        return stack
-    }()
-    
-    private let redButton = GameViewController.createLineButton(color: .systemRed, title: "RED")
-    private let blueButton = GameViewController.createLineButton(color: .systemBlue, title: "BLUE")
-    private let greenButton = GameViewController.createLineButton(color: .systemGreen, title: "GREEN")
-    private let orangeButton = GameViewController.createLineButton(color: .systemOrange, title: "ORANGE")
-    private let purpleButton = GameViewController.createLineButton(color: .systemPurple, title: "PURPLE")
-    
-    static func createLineButton(color: UIColor, title: String) -> UIButton {
-        let btn = UIButton(type: .system)
-        btn.backgroundColor = color
-        btn.layer.cornerRadius = 25
-        btn.layer.borderWidth = 4
-        btn.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor
-        btn.setTitle("", for: .normal)
-        
-        // Shadow for depth
-        btn.layer.shadowColor = UIColor.black.cgColor
-        btn.layer.shadowOffset = CGSize(width: 0, height: 4)
-        btn.layer.shadowOpacity = 0.2
-        btn.layer.shadowRadius = 6
-        
-        // Glossy effect overlay (optional, but let's keep it clean)
-        return btn
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "BackgroundColor")
         setupSKView()
         setupHUD() // This will now be an empty method, but called for consistency
-        setupLineSelection()
+        setupGestures()
+    }
+    
+    private func setupGestures() {
+        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
+        view.addGestureRecognizer(pinchGesture)
+    }
+    
+    @objc private func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+        if gesture.state == .changed {
+            gameScene?.setCameraZoom(1.0 / gesture.scale)
+            gesture.scale = 1.0
+        }
     }
     
     private func setupSKView() {
@@ -73,6 +53,10 @@ class GameViewController: UIViewController {
         // Remove old HUD if any
         hudHostingController?.view.removeFromSuperview()
         hudHostingController?.removeFromParent()
+        selectionHostingController?.view.removeFromSuperview()
+        selectionHostingController?.removeFromParent()
+        
+        HUDManager.shared.reset()
         
         let scene = GameScene(size: skView.bounds.size)
         scene.scaleMode = .resizeFill
@@ -93,10 +77,25 @@ class GameViewController: UIViewController {
             hosting.view.topAnchor.constraint(equalTo: view.topAnchor),
             hosting.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             hosting.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            hosting.view.heightAnchor.constraint(equalToConstant: 100)
+            hosting.view.heightAnchor.constraint(equalToConstant: 110)
         ])
         hosting.didMove(toParent: self)
         self.hudHostingController = hosting
+        
+        // Initial Selection HUD
+        let selectionHosting = UIHostingController(rootView: LineSelectionView(onColorSelected: { [weak self] color in
+            self?.handleColorSelection(color)
+        }))
+        selectionHosting.view.backgroundColor = .clear
+        addChild(selectionHosting)
+        view.addSubview(selectionHosting.view)
+        selectionHosting.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            selectionHosting.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            selectionHosting.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+        ])
+        selectionHosting.didMove(toParent: self)
+        self.selectionHostingController = selectionHosting
 
         // Callbacks
         gameScene?.onMenuTapped = { [weak self] in
@@ -150,7 +149,7 @@ class GameViewController: UIViewController {
         guard let scene = gameScene else { return }
         
         DispatchQueue.main.async {
-            HUDManager.shared.update(
+            let state = HUDState(
                 stitches: scene.score,
                 day: "Day \(DayCycleManager.shared.currentDay)",
                 time: DayCycleManager.shared.currentTimeString,
@@ -158,84 +157,38 @@ class GameViewController: UIViewController {
                 tension: scene.tension,
                 maxTension: scene.maxTension,
                 level: scene.level,
-                dayProgress: self.dayProgress
+                dayProgress: self.dayProgress,
+                selectedColor: scene.currentLineColor
             )
+            HUDManager.shared.update(with: state)
         }
     }
     
+    private func handleColorSelection(_ color: UIColor) {
+        playSound(named: "soft_click")
+        gameScene?.currentLineColor = color
+        updateHUD()
+    }
+    
     private func updateLineButtons(level: Int) {
-        // Red always unlocked
-        redButton.isHidden = false
-        redButton.alpha = 1.0
-        redButton.isEnabled = true
-        
-        // Blue unlocks at level 2
-        blueButton.isHidden = level < 2
-        blueButton.alpha = level >= 2 ? 1.0 : 0.3
-        blueButton.isEnabled = level >= 2
-        
-        // Green unlocks at level 3
-        greenButton.isHidden = level < 3
-        greenButton.alpha = level >= 3 ? 1.0 : 0.3
-        greenButton.isEnabled = level >= 3
-        
-        // Orange unlocks at level 4
-        orangeButton.isHidden = level < 4
-        orangeButton.alpha = level >= 4 ? 1.0 : 0.3
-        orangeButton.isEnabled = level >= 4
-        
-        // Purple unlocks at level 5
-        purpleButton.isHidden = level < 5
-        purpleButton.alpha = level >= 5 ? 1.0 : 0.3
-        purpleButton.isEnabled = level >= 5
-        
         // Fallback to red if currently selected is locked
-        if level < 5 && gameScene?.currentLineColor == .systemPurple { handleLineSelection(redButton) }
-        else if level < 4 && gameScene?.currentLineColor == .systemOrange { handleLineSelection(redButton) }
-        else if level < 3 && gameScene?.currentLineColor == .systemGreen { handleLineSelection(redButton) }
-        else if level < 2 && gameScene?.currentLineColor == .systemBlue { handleLineSelection(redButton) }
+        if let scene = gameScene {
+            if level < 5 && scene.currentLineColor == .systemPurple {
+                handleColorSelection(.systemRed)
+            } else if level < 4 && scene.currentLineColor == .systemOrange {
+                handleColorSelection(.systemRed)
+            } else if level < 3 && scene.currentLineColor == .systemGreen {
+                handleColorSelection(.systemRed)
+            } else if level < 2 && scene.currentLineColor == .systemBlue {
+                handleColorSelection(.systemRed)
+            } else {
+                updateHUD()
+            }
+        }
     }
     
     private func setupHUD() {
         // Obsolete: Replaced by SwiftUI in presentNewScene
-    }
-    
-    private func setupLineSelection() {
-        [redButton, blueButton, greenButton, orangeButton, purpleButton].forEach {
-            lineSelectionStack.addArrangedSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.heightAnchor.constraint(equalToConstant: 50).isActive = true
-            $0.widthAnchor.constraint(equalToConstant: 50).isActive = true
-            $0.addTarget(self, action: #selector(handleLineSelection(_:)), for: .touchUpInside)
-        }
-        
-        lineSelectionStack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(lineSelectionStack)
-        
-        NSLayoutConstraint.activate([
-            lineSelectionStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            lineSelectionStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
-        ])
-    }
-    
-    @objc private func handleLineSelection(_ sender: UIButton) {
-        playSound(named: "soft_click")
-        
-        // Reset scale
-        [redButton, blueButton, greenButton, orangeButton, purpleButton].forEach { btn in
-            UIView.animate(withDuration: 0.2) { btn.transform = .identity }
-        }
-        
-        // Highlight selected
-        UIView.animate(withDuration: 0.2) {
-            sender.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
-        }
-        
-        if sender == redButton { gameScene?.currentLineColor = .systemRed }
-        if sender == blueButton { gameScene?.currentLineColor = .systemBlue }
-        if sender == greenButton { gameScene?.currentLineColor = .systemGreen }
-        if sender == orangeButton { gameScene?.currentLineColor = .systemOrange }
-        if sender == purpleButton { gameScene?.currentLineColor = .systemPurple }
     }
     
     private func showGameOverOverlay(score: Int, reason: String) {
@@ -247,20 +200,20 @@ class GameViewController: UIViewController {
         
         let titleLabel = UILabel()
         titleLabel.text = reason.uppercased()
-        titleLabel.font = UIFont(name: "ChalkboardSE-Bold", size: 36)
+        titleLabel.font = UIFont(name: "AvenirNext-Heavy", size: 36)
         titleLabel.textColor = .white
         titleLabel.numberOfLines = 0
         titleLabel.textAlignment = .center
         
         let finalScoreLabel = UILabel()
         finalScoreLabel.text = "Stitches: \(score)"
-        finalScoreLabel.font = UIFont(name: "ChalkboardSE-Bold", size: 32)
+        finalScoreLabel.font = UIFont(name: "AvenirNext-Bold", size: 32)
         finalScoreLabel.textColor = .yellow
         finalScoreLabel.textAlignment = .center
         
         let replayBtn = UIButton(type: .system)
         replayBtn.setTitle("REPLAY", for: .normal)
-        replayBtn.titleLabel?.font = UIFont(name: "ChalkboardSE-Bold", size: 24)
+        replayBtn.titleLabel?.font = UIFont(name: "AvenirNext-Bold", size: 24)
         replayBtn.backgroundColor = .systemGreen
         replayBtn.setTitleColor(.white, for: .normal)
         replayBtn.layer.cornerRadius = 15
@@ -268,7 +221,7 @@ class GameViewController: UIViewController {
         
         let menuBtn = UIButton(type: .system)
         menuBtn.setTitle("MENU", for: .normal)
-        menuBtn.titleLabel?.font = UIFont(name: "ChalkboardSE-Bold", size: 24)
+        menuBtn.titleLabel?.font = UIFont(name: "AvenirNext-Bold", size: 24)
         menuBtn.backgroundColor = .white
         menuBtn.setTitleColor(.black, for: .normal)
         menuBtn.layer.cornerRadius = 15

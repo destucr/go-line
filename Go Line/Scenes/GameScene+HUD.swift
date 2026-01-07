@@ -12,13 +12,13 @@ extension GameScene {
     }
     
     func showTutorialHint() {
-        let hint = SKLabelNode(text: "Draw a path between stations to begin")
+        let hint = SKLabelNode(text: "DRAW A PATH BETWEEN STATIONS TO BEGIN")
         hint.name = "tutorial_hint"
-        hint.fontName = "ChalkboardSE-Bold"
-        hint.fontSize = 24
-        hint.fontColor = .darkGray
-        // Relative to camera center (0,0)
-        hint.position = CGPoint(x: 0, y: 100)
+        hint.fontName = "AvenirNext-Bold"
+        hint.fontSize = 16
+        hint.fontColor = UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 0.8) // Dark Gray for contrast
+        // Move lower to avoid HUD at the top
+        hint.position = CGPoint(x: 0, y: 60)
         hint.alpha = 0
         
         // Add to camera so it stays on screen
@@ -29,15 +29,16 @@ extension GameScene {
         }
         
         let appear = SKAction.fadeIn(withDuration: 1.0)
-        let wait = SKAction.wait(forDuration: 4.0)
+        let wait = SKAction.wait(forDuration: 5.0)
         let disappear = SKAction.fadeOut(withDuration: 1.0)
         
         hint.run(SKAction.sequence([appear, wait, disappear, SKAction.removeFromParent()]))
     }
     
     func showLevelUpPopup() {
-        let container = SKShapeNode(rectOf: CGSize(width: 400, height: 120), cornerRadius: 20)
-        container.fillColor = UIColor(named: "BackgroundColor") ?? .white
+        let width: CGFloat = 350
+        let height: CGFloat = 100
+        let container = GraphicsManager.createTagNode(size: CGSize(width: width, height: height))
         
         var unlockedColorName = ""
         var strokeColor: UIColor = .systemBlue
@@ -47,13 +48,12 @@ extension GameScene {
         case 3: unlockedColorName = "GREEN"; strokeColor = .systemGreen
         case 4: unlockedColorName = "ORANGE"; strokeColor = .systemOrange
         case 5: unlockedColorName = "PURPLE"; strokeColor = .systemPurple
-        default: unlockedColorName = "NEW GOALS"; strokeColor = .black
+        default: unlockedColorName = "NEW GOALS"; strokeColor = .white
         }
         
         container.strokeColor = strokeColor
-        container.lineWidth = 4
-        container.position = CGPoint(x: 0, y: -20)
-        container.zPosition = 1000
+        container.position = CGPoint(x: 0, y: 0)
+        container.zPosition = 1_000
         container.alpha = 0
         
         if let cam = camera {
@@ -63,22 +63,22 @@ extension GameScene {
         }
         
         let titleLabel = SKLabelNode(text: "LEVEL \(level) REACHED")
-        titleLabel.fontName = "ChalkboardSE-Bold"
-        titleLabel.fontSize = 24
-        titleLabel.fontColor = .darkGray
+        titleLabel.fontName = "AvenirNext-Bold"
+        titleLabel.fontSize = 14
+        titleLabel.fontColor = .white.withAlphaComponent(0.6)
         titleLabel.position = CGPoint(x: 0, y: 15)
         container.addChild(titleLabel)
         
         let subLabel = SKLabelNode(text: level <= 5 ? "\(unlockedColorName) LINE UNLOCKED" : "GOALS INCREASED")
-        subLabel.fontName = "ChalkboardSE-Bold"
-        subLabel.fontSize = 28
+        subLabel.fontName = "AvenirNext-Bold"
+        subLabel.fontSize = 24
         subLabel.fontColor = strokeColor
-        subLabel.position = CGPoint(x: 0, y: -25)
+        subLabel.position = CGPoint(x: 0, y: -15)
         container.addChild(subLabel)
         
         let sequence = SKAction.sequence([
             SKAction.fadeIn(withDuration: 0.3),
-            SKAction.wait(forDuration: 3.0),
+            SKAction.wait(forDuration: 3.5),
             SKAction.fadeOut(withDuration: 0.5),
             SKAction.removeFromParent()
         ])
@@ -91,26 +91,36 @@ extension GameScene {
         container.zPosition = 100
         addChild(container)
         
+        // No background shape as requested
+        
         let scoreLabel = SKLabelNode(text: "+\(amount)")
-        scoreLabel.fontName = "ChalkboardSE-Bold"
-        scoreLabel.fontSize = 20
-        scoreLabel.fontColor = .systemGreen
+        scoreLabel.fontName = "AvenirNext-Heavy"
+        scoreLabel.fontSize = 22
+        scoreLabel.fontColor = UIColor(red: 0.1, green: 0.6, blue: 0.1, alpha: 1.0) // Darker Green
+        scoreLabel.verticalAlignmentMode = .center
+        scoreLabel.position = CGPoint(x: 0, y: earnings > 0 ? 12 : 0)
         container.addChild(scoreLabel)
         
         if earnings > 0 {
-            let earningLabel = SKLabelNode(text: "+\(earnings) Thread")
-            earningLabel.fontName = "ChalkboardSE-Bold"
-            earningLabel.fontSize = 16
-            earningLabel.fontColor = .systemOrange
-            earningLabel.position = CGPoint(x: 0, y: -20)
+            let earningLabel = SKLabelNode(text: "+\(earnings) THREAD")
+            earningLabel.fontName = "AvenirNext-Bold"
+            earningLabel.fontSize = 12
+            earningLabel.fontColor = UIColor(red: 0.8, green: 0.4, blue: 0.0, alpha: 1.0) // Darker Orange
+            earningLabel.verticalAlignmentMode = .center
+            earningLabel.position = CGPoint(x: 0, y: -12)
             container.addChild(earningLabel)
         }
         
-        // Animation
-        let move = SKAction.moveBy(x: 0, y: 40, duration: 0.8)
-        let fade = SKAction.fadeOut(withDuration: 0.8)
-        let group = SKAction.group([move, fade])
+        // Animation: Gentle rise and scale up
+        container.setScale(0.5)
+        let scaleUp = SKAction.scale(to: 1.0, duration: 0.2)
+        let move = SKAction.moveBy(x: 0, y: 60, duration: 1.2)
+        let fade = SKAction.sequence([
+            SKAction.wait(forDuration: 0.8),
+            SKAction.fadeOut(withDuration: 0.4)
+        ])
         
+        let group = SKAction.group([move, fade, scaleUp])
         container.run(SKAction.sequence([group, SKAction.removeFromParent()]))
     }
     
