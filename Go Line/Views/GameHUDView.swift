@@ -124,7 +124,6 @@ struct HUDButton: View {
     
     var body: some View {
         Button(action: {
-            SoundManager.shared.playSound("soft_click")
             action()
         }, label: {
             Image(systemName: icon)

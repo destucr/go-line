@@ -255,7 +255,7 @@ extension GameScene {
             let carriagePassengers = Array(context.train.passengers[startIdx..<endIdx])
             
             let colSpacing: CGFloat = 5.0 // Slightly increased to accommodate balanced sizes
-            let rowSpacing: CGFloat = 5.0 
+            let rowSpacing: CGFloat = 5.0
             
             // Center the grid
             let startX: CGFloat = -colSpacing / 2
