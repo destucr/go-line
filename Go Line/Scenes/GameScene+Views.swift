@@ -246,16 +246,42 @@ extension GameScene {
         
         node?.addChild(cNode)
         
-        // Passengers indicators inside carriages
-        let startIdx = index * 6
-        let endIdx = min(startIdx + 6, context.train.passengers.count)
-        if startIdx < context.train.passengers.count {
+        // Passengers indicators inside carriages (2x2 Grid)
+        let capacityPerCarriage = 4 // As updated in Train.swift
+        let startIdx = index * capacityPerCarriage
+        let endIdx = min(startIdx + capacityPerCarriage, context.train.passengers.count)
+        
+        if startIdx < endIdx {
             let carriagePassengers = Array(context.train.passengers[startIdx..<endIdx])
-            let pSpacing: CGFloat = 4.0
+            
+            let colSpacing: CGFloat = 5.0 // Slightly increased to accommodate balanced sizes
+            let rowSpacing: CGFloat = 5.0 
+            
+            // Center the grid
+            let startX: CGFloat = -colSpacing / 2
+            let startY: CGFloat = rowSpacing / 2
+            
             for localIdx in 0..<carriagePassengers.count {
                 let passenger = carriagePassengers[localIdx]
-                let pShape = GraphicsManager.createStationShape(type: passenger.destinationType, radius: 2.5, lineWidth: 1.0)
-                pShape.position = CGPoint(x: CGFloat(localIdx) * pSpacing - 10, y: -2)
+                
+                // Fill columns from back (0) to front (1)
+                let col = localIdx / 2
+                let row = localIdx % 2
+                
+                let x = startX + CGFloat(col) * colSpacing
+                let y = startY - CGFloat(row) * rowSpacing
+                
+                let pShape = GraphicsManager.createStationShape(type: passenger.destinationType, radius: 2.0, lineWidth: 1.0)
+                pShape.position = CGPoint(x: x, y: y)
+                
+                // Orientation: Base faces the wall, Tip faces the aisle
+                if passenger.destinationType == .triangle {
+                    pShape.zRotation = (row == 0) ? .pi : 0
+                }
+                
+                // Revert to original cleaner colors
+                pShape.strokeColor = UIColor(white: 0.1, alpha: 1.0)
+                pShape.fillColor = .white
                 cNode.addChild(pShape)
             }
         }

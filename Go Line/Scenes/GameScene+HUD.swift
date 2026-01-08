@@ -91,23 +91,40 @@ extension GameScene {
         container.zPosition = 100
         addChild(container)
         
-        // No background shape as requested
+        let hasEarnings = earnings > 0
+        let bgWidth: CGFloat = hasEarnings ? 100 : 60
+        let bgHeight: CGFloat = hasEarnings ? 40 : 28
+        
+        // Metro Pill Background
+        let bg = SKShapeNode(rectOf: CGSize(width: bgWidth, height: bgHeight), cornerRadius: 4)
+        bg.fillColor = .white
+        bg.strokeColor = .black
+        bg.lineWidth = 2
+        // Shadow effect built into shape
+        let shadow = SKShapeNode(rectOf: CGSize(width: bgWidth, height: bgHeight), cornerRadius: 4)
+        shadow.fillColor = .black.withAlphaComponent(0.3)
+        shadow.strokeColor = .clear
+        shadow.position = CGPoint(x: 4, y: -4)
+        shadow.zPosition = -1
+        
+        container.addChild(shadow)
+        container.addChild(bg)
         
         let scoreLabel = SKLabelNode(text: "+\(amount)")
-        scoreLabel.fontName = "AvenirNext-Heavy"
-        scoreLabel.fontSize = 22
-        scoreLabel.fontColor = UIColor(red: 0.1, green: 0.6, blue: 0.1, alpha: 1.0) // Darker Green
+        scoreLabel.fontName = "ArialRoundedMTBold" // System-like rounded bold
+        scoreLabel.fontSize = 18
+        scoreLabel.fontColor = .black
         scoreLabel.verticalAlignmentMode = .center
-        scoreLabel.position = CGPoint(x: 0, y: earnings > 0 ? 12 : 0)
+        scoreLabel.position = CGPoint(x: 0, y: hasEarnings ? 8 : 0)
         container.addChild(scoreLabel)
         
-        if earnings > 0 {
+        if hasEarnings {
             let earningLabel = SKLabelNode(text: "+\(earnings) THREAD")
-            earningLabel.fontName = "AvenirNext-Bold"
-            earningLabel.fontSize = 12
-            earningLabel.fontColor = UIColor(red: 0.8, green: 0.4, blue: 0.0, alpha: 1.0) // Darker Orange
+            earningLabel.fontName = "Courier-Bold"
+            earningLabel.fontSize = 10
+            earningLabel.fontColor = .black
             earningLabel.verticalAlignmentMode = .center
-            earningLabel.position = CGPoint(x: 0, y: -12)
+            earningLabel.position = CGPoint(x: 0, y: -8)
             container.addChild(earningLabel)
         }
         

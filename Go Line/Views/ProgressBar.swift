@@ -14,27 +14,44 @@ struct ProgressBar: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.system(size: 10))
-                .foregroundColor(baseColor.opacity(0.5))
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(baseColor)
+                .frame(width: 16)
             
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(baseColor.opacity(0.1))
-                        .frame(height: 3)
+                    // Track Background
+                    Rectangle()
+                        .fill(Color.black.opacity(0.1))
+                        .overlay(
+                            Rectangle()
+                                .stroke(baseColor.opacity(0.3), lineWidth: 1)
+                        )
                     
-                    Capsule()
+                    // Fill
+                    Rectangle()
                         .fill(color)
-                        .frame(width: geo.size.width * min(1.0, max(0, progress)), height: 3)
-                        .animation(.linear(duration: 0.5), value: progress)
+                        .frame(width: geo.size.width * min(1.0, max(0, progress)))
+                        .animation(.linear(duration: 0.2), value: progress) // Snappier animation
+                    
+                    // Stripe overlay for texture
+                    HStack(spacing: 4) {
+                        ForEach(0..<Int(geo.size.width / 8), id: \.self) { _ in
+                            Rectangle()
+                                .fill(Color.black.opacity(0.1))
+                                .frame(width: 1)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .mask(Rectangle().frame(width: geo.size.width * min(1.0, max(0, progress))))
                 }
             }
-            .frame(height: 3)
+            .frame(height: 12) // Thicker bar
             
             Text(label)
-                .font(.system(size: 9, weight: .bold, design: .monospaced))
-                .foregroundColor(baseColor.opacity(0.5))
-                .frame(width: 32)
+                .font(MetroTheme.dataFont(size: 10))
+                .foregroundColor(baseColor)
+                .frame(width: 36, alignment: .trailing)
         }
     }
 }

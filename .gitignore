@@ -4,28 +4,30 @@
 # https://github.com/github/gitignore/blob/main/Global/Xcode.gitignore
 # and the build-in Xcode.gitignore template in Xcode's "New Project" dialog.
 
-## Build results
-build/
-DerivedData/
-
-## User-specific files
-*.xcuserdatad
-*.xcuserstate
-project.xcworkspace/xcuserdata/
+## User settings
 xcuserdata/
+
+## Derived data
+DerivedData/
+build/
+
+## Xcode 8 and earlier
+*.xcscmblueprint
 *.xccheckout
-*.xcscheme
-*.scshareddata
-IndividualCodeSnippets.plist
-IDETemplateMacros.plist
+
+## Xcode 9 and later
+*.xcresult/
+
+## CocoaPods
+Pods/
+# Go Line.xcworkspace is usually tracked, but user data inside it is not.
+# If you regenerate the workspace entirely on every install, you can ignore the whole folder.
+# For now, we will track the workspace container structure but ignore user settings.
+*.xcworkspace/xcuserdata/
 
 ## Swift Package Manager
 .build/
 .swiftpm/
-
-## CocoaPods
-Pods/
-Go Line.xcworkspace
 
 ## App Store Connect
 fastlane/report.xml
@@ -33,11 +35,18 @@ fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
 
-## Other
+## Bundle artifacts
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## OS & Editor
 .DS_Store
 *.swp
 *.lock
 *.hmap
-*.ipa
-ASSETS_PROMPTS.md
+*~
+*.moved-aside
+
+# SwiftLint
 swiftlint_report*.json

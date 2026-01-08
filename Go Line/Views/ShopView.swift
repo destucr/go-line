@@ -6,183 +6,132 @@ struct ShopView: View {
     var day: Int
     var onStartNextDay: () -> Void
     
-    // Modern Industrial Palette
-    private let primaryDark = Color(white: 0.1)
-    private let accentColor = Color.orange
-    private let glassBackground = Color.white.opacity(0.05)
-    
     var body: some View {
         ZStack {
-            // Background with subtle gradient
-            LinearGradient(colors: [primaryDark, Color(white: 0.05)], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            MetroTheme.mainBackground.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top Header Bar
-                HStack(alignment: .bottom) {
-                    VStack(alignment: .leading, spacing: 4) {
+                // MARK: - Header
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 0) {
                         Text("SHIFT \(day) COMPLETE")
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                            .foregroundColor(accentColor)
-                        Text("INFRASTRUCTURE UPGRADES")
-                            .font(.system(size: 24, weight: .black, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(MetroTheme.dataFont(size: 14))
+                            .foregroundColor(MetroTheme.inkGray)
+                            .padding(.bottom, 4)
+                        
+                        Text("SERVICE DEPOT")
+                            .font(MetroTheme.titleFont(size: 32))
+                            .foregroundColor(MetroTheme.inkBlack)
                     }
-                    
                     Spacer()
                     
-                    // Compact Performance
-                    HStack(spacing: 20) {
-                        PerformanceItem(
-                            icon: "waveform.path.ecg",
-                            value: "\(Int(hudManager.tension))%",
-                            label: "TENSION",
-                            progress: hudManager.tension / hudManager.maxTension,
-                            color: hudManager.tension > 80 ? .red : accentColor
-                        )
-                        .frame(width: 140)
-                        
-                        PerformanceItem(
-                            icon: "clock.fill",
-                            value: "\(Int(hudManager.dayProgress * 100))%",
-                            label: "QUOTA",
-                            progress: CGFloat(hudManager.dayProgress),
-                            color: .green
-                        )
-                        .frame(width: 140)
-                    }
-                }
-                .padding(.horizontal, 30)
-                .padding(.top, 20)
-                
-                Spacer()
-                
-                // Resources & Upgrades Container
-                VStack(spacing: 16) {
-                    // Available Thread
+                    // Status Badge
                     HStack(spacing: 12) {
-                        Image(systemName: "f.circle.fill")
-                            .foregroundColor(accentColor)
-                            .font(.system(size: 20))
-                        Text("\(hudManager.thread)")
-                            .font(.system(size: 24, weight: .bold, design: .monospaced))
-                            .foregroundColor(.white)
-                        Text("AVAILABLE THREAD")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white.opacity(0.5))
+                        StatusIndicator(label: "NET STATUS", value: "STABLE", color: MetroTheme.goGreen)
+                        StatusIndicator(label: "THREAD", value: "\(hudManager.thread)", color: MetroTheme.inkBlack)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 8)
-                    .background(Capsule().fill(glassBackground))
-                    
-                    // Upgrade Grid
-                    HStack(spacing: 16) {
-                        UpgradeCard(
-                            icon: "tram.fill",
-                            title: "New Carriage",
-                            description: "+6 Capacity",
-                            level: hudManager.carriageLevel,
-                            cost: UpgradeManager.shared.getCarriageCost(),
-                            isAffordable: hudManager.thread >= UpgradeManager.shared.getCarriageCost()
-                        ) {
-                            SoundManager.shared.playSound("soft_click")
-                            if UpgradeManager.shared.buyCarriage() {
-                                SoundManager.shared.playSound("sfx_levelup")
-                            }
-                        }
-                        
-                        UpgradeCard(
-                            icon: "bolt.fill",
-                            title: "Faster Needle",
-                            description: "+15% Speed",
-                            level: hudManager.speedLevel,
-                            cost: UpgradeManager.shared.getSpeedCost(),
-                            isAffordable: hudManager.thread >= UpgradeManager.shared.getSpeedCost()
-                        ) {
-                            SoundManager.shared.playSound("soft_click")
-                            if UpgradeManager.shared.buySpeed() {
-                                SoundManager.shared.playSound("sfx_levelup")
-                            }
-                        }
-                        
-                        UpgradeCard(
-                            icon: "shield.fill",
-                            title: "Fabric Strength",
-                            description: "+25 Max Tension",
-                            level: hudManager.strengthLevel,
-                            cost: UpgradeManager.shared.getStrengthCost(),
-                            isAffordable: hudManager.thread >= UpgradeManager.shared.getStrengthCost()
-                        ) {
-                            SoundManager.shared.playSound("soft_click")
-                            if UpgradeManager.shared.buyStrength() {
-                                SoundManager.shared.playSound("sfx_levelup")
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 30)
                 }
+                .padding(.horizontal, 40)
+                .padding(.top, 40)
                 
                 Spacer()
                 
-                // Footer Action
+                // MARK: - Cards
+                HStack(spacing: 24) {
+                    UpgradeCard(
+                        icon: "tram.fill",
+                        title: "CARRIAGE",
+                        subtitle: "+4 Capacity",
+                        level: hudManager.carriageLevel,
+                        cost: UpgradeManager.shared.getCarriageCost(),
+                        isAffordable: hudManager.thread >= UpgradeManager.shared.getCarriageCost()
+                    ) {
+                        SoundManager.shared.playSound("soft_click")
+                        if UpgradeManager.shared.buyCarriage() {
+                            SoundManager.shared.playSound("sfx_levelup")
+                        }
+                    }
+                    
+                    UpgradeCard(
+                        icon: "speedometer",
+                        title: "VELOCITY",
+                        subtitle: "Increase Train Speed",
+                        level: hudManager.speedLevel,
+                        cost: UpgradeManager.shared.getSpeedCost(),
+                        isAffordable: hudManager.thread >= UpgradeManager.shared.getSpeedCost()
+                    ) {
+                        SoundManager.shared.playSound("soft_click")
+                        if UpgradeManager.shared.buySpeed() {
+                            SoundManager.shared.playSound("sfx_levelup")
+                        }
+                    }
+                    
+                    UpgradeCard(
+                        icon: "shield.fill",
+                        title: "TENSILE",
+                        subtitle: "Increase Max Tension",
+                        level: hudManager.strengthLevel,
+                        cost: UpgradeManager.shared.getStrengthCost(),
+                        isAffordable: hudManager.thread >= UpgradeManager.shared.getStrengthCost()
+                    ) {
+                        SoundManager.shared.playSound("soft_click")
+                        if UpgradeManager.shared.buyStrength() {
+                            SoundManager.shared.playSound("sfx_levelup")
+                        }
+                    }
+                }
+                .padding(.horizontal, 40)
+                
+                Spacer()
+                
+                // MARK: - Footer
                 Button(action: {
                     SoundManager.shared.playSound("soft_click")
                     onStartNextDay()
                 }, label: {
                     HStack {
-                        Text("INITIALIZE SHIFT \(day + 1)")
+                        Text("START SHIFT")
                         Image(systemName: "arrow.right")
                     }
-                    .font(.system(size: 16, weight: .black, design: .monospaced))
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 60)
-                    .padding(.vertical, 14)
-                    .background(Capsule().fill(accentColor))
+                    .font(MetroTheme.titleFont(size: 20))
+                    .foregroundColor(MetroTheme.inkBlack)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 24)
+                    .background(MetroTheme.safetyYellow)
+                    .border(MetroTheme.inkBlack, width: 3) // Hard border on footer
                 })
-                .padding(.bottom, 20)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 40)
             }
         }
     }
 }
 
-struct PerformanceItem: View {
-    let icon: String
-    let value: String
+struct StatusIndicator: View {
     let label: String
-    let progress: CGFloat
+    let value: String
     let color: Color
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.system(size: 10))
-                    .foregroundColor(color)
-                Text(label)
-                    .font(.system(size: 8, weight: .bold))
-                    .foregroundColor(.white.opacity(0.4))
-                Spacer()
-                Text(value)
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
-            }
-            
-            ZStack(alignment: .leading) {
-                Capsule().fill(Color.white.opacity(0.1))
-                Capsule().fill(color)
-                    .frame(width: max(0, min(140 * progress, 140)))
-            }
-            .frame(height: 3)
+        VStack(alignment: .trailing, spacing: 2) {
+            Text(label)
+                .font(MetroTheme.dataFont(size: 10))
+                .foregroundColor(MetroTheme.inkGray)
+            Text(value)
+                .font(MetroTheme.dataFont(size: 24))
+                .foregroundColor(color)
         }
-        .padding(8)
-        .background(RoundedRectangle(cornerRadius: 6).fill(Color.white.opacity(0.03)))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color.white)
+        .border(MetroTheme.inkBlack, width: 2)
     }
 }
 
 struct UpgradeCard: View {
     let icon: String
     let title: String
-    let description: String
+    let subtitle: String
     let level: Int
     let cost: Int
     let isAffordable: Bool
@@ -190,47 +139,52 @@ struct UpgradeCard: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 24))
-                    .foregroundColor(isAffordable ? .orange : .white.opacity(0.2))
-                
-                VStack(spacing: 2) {
-                    Text(title.uppercased())
-                        .font(.system(size: 10, weight: .black))
-                        .foregroundColor(.white)
-                    Text(description)
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(.white.opacity(0.5))
+            VStack(alignment: .leading, spacing: 0) {
+                // Icon Header
+                HStack {
+                    Image(systemName: icon)
+                        .font(.system(size: 28))
+                        .foregroundColor(isAffordable ? MetroTheme.inkBlack : MetroTheme.inkGray.opacity(0.3))
+                    Spacer()
+                    Text("LVL \(level)")
+                        .font(MetroTheme.dataFont(size: 14))
+                        .foregroundColor(MetroTheme.inkGray)
                 }
+                .padding(.bottom, 20)
                 
-                Divider().background(Color.white.opacity(0.1))
+                Text(title)
+                    .font(MetroTheme.titleFont(size: 20))
+                    .foregroundColor(isAffordable ? MetroTheme.inkBlack : MetroTheme.inkGray)
                 
-                VStack(spacing: 2) {
-                    Text("LEVEL \(level)")
-                        .font(.system(size: 9, weight: .bold, design: .monospaced))
-                        .foregroundColor(.white.opacity(0.7))
-                    
-                    HStack(spacing: 4) {
-                        Image(systemName: "f.circle.fill")
-                            .font(.system(size: 9))
-                        Text("\(cost)")
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                    }
-                    .foregroundColor(isAffordable ? .orange : .white.opacity(0.3))
+                Text(subtitle.uppercased())
+                    .font(MetroTheme.dataFont(size: 10))
+                    .foregroundColor(MetroTheme.inkGray)
+                    .padding(.bottom, 20)
+                
+                Spacer()
+                
+                // Cost Pill
+                HStack {
+                    Text("COST")
+                        .font(MetroTheme.dataFont(size: 10))
+                        .foregroundColor(MetroTheme.inkGray)
+                    Spacer()
+                    Text("\(cost)")
+                        .font(MetroTheme.dataFont(size: 18))
+                        .foregroundColor(isAffordable ? MetroTheme.inkBlack : MetroTheme.inkGray)
                 }
+                .padding(.top, 12)
+                .overlay(
+                    Rectangle()
+                        .frame(height: 2)
+                        .foregroundColor(MetroTheme.inkBlack.opacity(0.1)),
+                    alignment: .top
+                )
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.white.opacity(0.05))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(isAffordable ? Color.orange.opacity(0.3) : Color.clear, lineWidth: 1)
-                    )
-            )
+            .metroCardStyle(borderColor: isAffordable ? MetroTheme.inkBlack : MetroTheme.inkBlack.opacity(0.1))
         }
+        .buttonStyle(PlainButtonStyle())
+        .frame(height: 220)
         .disabled(!isAffordable)
         .opacity(isAffordable ? 1.0 : 0.6)
     }

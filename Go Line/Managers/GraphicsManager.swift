@@ -58,11 +58,13 @@ class GraphicsManager {
             node = SKShapeNode(rect: rect, cornerRadius: 4)
         case .triangle:
             let path = CGMutablePath()
-            let h = radius * sqrt(3)
+            // Visually balance size: Triangles feel smaller, so we boost the radius slightly
+            let adjustedRadius = radius * 1.2
+            let h = adjustedRadius * sqrt(3)
             let yOffset = h / 3
             path.move(to: CGPoint(x: 0, y: h - yOffset))
-            path.addLine(to: CGPoint(x: -radius, y: -yOffset))
-            path.addLine(to: CGPoint(x: radius, y: -yOffset))
+            path.addLine(to: CGPoint(x: -adjustedRadius, y: -yOffset))
+            path.addLine(to: CGPoint(x: adjustedRadius, y: -yOffset))
             path.closeSubpath()
             node = SKShapeNode(path: path)
             
