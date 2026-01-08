@@ -2,41 +2,66 @@
 
 **Connect the City.**
 
-Go Line is a zen transit management simulator with a minimalist, industrial paper-and-thread aesthetic. Draw a network of colorful transit lines to transport passengers across a textured map, managing efficiency and tension as your city grows.
+Go Line is a zen transit management simulator. Draw colorful transit lines to transport passengers, managing efficiency and flow as your city grows.
 
 ![Gameplay Preview](screenshots/gameplay-full.PNG)
 
-## ✨ Core Identity
-Go Line blends the strategic depth of transit puzzles with a clean, industrial art style. Every line you draw is a "stitch" on the map, and every delivery contributes to the overall stability of your urban network.
+## Stats
 
-## 🧵 Key Features
+![Swift](https://img.shields.io/badge/Swift-5.10-orange?style=flat-square&logo=swift)
+![Platform](https://img.shields.io/badge/Platform-iOS%2015.0+-lightgrey?style=flat-square&logo=apple)
+![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
+![Build](https://img.shields.io/badge/Build-Passing-success?style=flat-square)
+![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square)
 
-### 1. Progressive Network Expansion
-Start with a single red line. As you complete shifts and your level increases, you'll unlock new colors (Blue, Green, Orange, Purple), allowing you to build complex, multi-line transit systems.
+![GitHub repo size](https://img.shields.io/github/repo-size/destucr/go-line?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/destucr/go-line?style=social)
+![GitHub forks](https://img.shields.io/github/forks/destucr/go-line?style=social)
+![GitHub issues](https://img.shields.io/github/issues/destucr/go-line?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/destucr/go-line?style=flat-square)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/destucr/go-line?style=flat-square)
+![GitHub language count](https://img.shields.io/github/languages/count/destucr/go-line?style=flat-square)
+![GitHub top language](https://img.shields.io/github/languages/top/destucr/go-line?style=flat-square)
 
-### 2. Day Cycle Management
-Manage your network through timed daily shifts. Monitor the **Day Progress Bar** (Green) to track your shift's progress. Each successful day earns you currency and brings you closer to new unlocks.
+## Core Identity
 
-### 3. Systematic Upgrades
-Spend your earned **Thread** (Currency) in the shop to improve your fleet:
-- 🚆 **Add Carriages:** Increase train capacity to handle high-traffic stations.
-- ⚡ **Faster Needle:** Boost train speed to reduce passenger wait times.
-- 💪 **Network Strength:** Toughen your network to handle higher tension and overcrowding levels.
+Go Line is a strategic transit puzzle with a clean, industrial aesthetic. Every line you draw stitches the map together. Every delivery keeps your network stable.
 
-### 4. Interactive Camera & UI
-- **Industrial UI:** A revamped, tactile interface featuring metallic textures, progress bars, and clean typography.
-- **Pinch-to-Zoom:** Freely explore your growing city network with intuitive pinch and pan gestures.
+## Key Features
 
-### 5. Smooth Geometry
-Draw curved, "stitched" paths between stations using an intuitive touch-drag interface. The game uses quadratic Bezier curves and dashed line patterns to create a clean, handcrafted look.
+### Progressive Network Expansion
 
-## 🕹️ How to Play
-1. **Connect:** Drag between stations to create a transit line with your current color.
-2. **Deliver:** Passengers (Geometric Shapes) spawn at stations and want to travel to a station with a matching shape.
-3. **Manage Tension:** Prevent stations from overcrowding. High tension levels will eventually lead to a network failure.
-4. **Advance:** Complete shifts to earn Thread, purchase upgrades, and unlock new line colors.
+Start with a single red line. Complete shifts to unlock new colors—Blue, Green, Orange, Purple—and build complex multi-line systems.
 
-## 🖼️ Gallery
+### Day Cycle Management
+
+Manage your network through timed shifts. The Day Progress Bar tracks your progress. Each successful day earns currency and unlocks.
+
+### Systematic Upgrades
+
+Spend Thread (currency) in the shop to improve your fleet:
+
+- 🚆 **Add Carriages:** Increase train capacity for high-traffic stations.
+- ⚡ **Faster Needle:** Boost train speed to reduce wait times.
+- 💪 **Network Strength:** Handle higher tension and overcrowding.
+
+### Interactive Camera & UI
+
+- **Industrial UI:** Metallic textures, progress bars, clean typography.
+- **Pinch-to-Zoom:** Explore your network with intuitive gestures.
+
+### Smooth Geometry
+
+Draw curved, stitched paths between stations with touch-drag controls. Quadratic Bezier curves and dashed patterns create a clean, handcrafted look.
+
+## How to Play
+
+1. **Connect:** Drag between stations to create a transit line.
+2. **Deliver:** Transport passengers (geometric shapes) to matching stations.
+3. **Manage Tension:** Prevent overcrowding. High tension leads to network failure.
+4. **Advance:** Complete shifts to earn Thread, buy upgrades, unlock colors.
+
+## Gallery
 
 | Menu | Shop | Gameplay |
 | :---: | :---: | :---: |
@@ -51,7 +76,6 @@ Draw curved, "stitched" paths between stations using an intuitive touch-drag int
 - **Architecture:** Reactive state management with Manager-based relays.
 - **Visuals:** Custom GLSL Shaders for paper textures and dashed path rendering.
 
-## 🚀 Getting Started
 1. Clone the repository.
 2. Ensure you have [CocoaPods](https://cocoapods.org/) installed (`brew install cocoapods`).
 3. Run `pod install` in the project root.
@@ -60,4 +84,8 @@ Draw curved, "stitched" paths between stations using an intuitive touch-drag int
 6. Build and Run!
 
 ---
-*Created for fans of minimalist strategy and transit sims.*
+
+*For fans of minimalist strategy and transit sims.*
+
+[![Made with Swift](https://img.shields.io/badge/Made%20with-Swift-orange?style=for-the-badge&logo=swift)](https://swift.org)
+[![SpriteKit](https://img.shields.io/badge/Built%20with-SpriteKit-blue?style=for-the-badge)](https://developer.apple.com/spritekit/)
