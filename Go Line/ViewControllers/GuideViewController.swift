@@ -140,6 +140,7 @@ class GuideViewController: UIViewController {
     }
     
     @objc private func handleBack() {
+        SoundManager.shared.playSound("sfx_click_cancel")
         onBackTapped?()
     }
     

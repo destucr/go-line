@@ -6,8 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		59C3C60A60491950444A55FD /* Pods_Go_Line.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7F7FF36CBD11617154DDF7B /* Pods_Go_Line.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		2699CBCE0CA798C30E153C2D /* Pods-Go Line.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Go Line.debug.xcconfig"; path = "Target Support Files/Pods-Go Line/Pods-Go Line.debug.xcconfig"; sourceTree = "<group>"; };
 		431AAFD12F0E448C0094962E /* Go Line.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Go Line.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7F7FF36CBD11617154DDF7B /* Pods_Go_Line.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Go_Line.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EFED85C2D8DED313C07C6B0C /* Pods-Go Line.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Go Line.release.xcconfig"; path = "Target Support Files/Pods-Go Line/Pods-Go Line.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,17 +43,38 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59C3C60A60491950444A55FD /* Pods_Go_Line.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		04390DB31278A282B83062B2 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				2699CBCE0CA798C30E153C2D /* Pods-Go Line.debug.xcconfig */,
+				EFED85C2D8DED313C07C6B0C /* Pods-Go Line.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		27EBB6CBC7F565DFFCD884EA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E7F7FF36CBD11617154DDF7B /* Pods_Go_Line.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		431AAFC82F0E448C0094962E = {
 			isa = PBXGroup;
 			children = (
 				431AAFD32F0E448C0094962E /* Go Line */,
 				431AAFD22F0E448C0094962E /* Products */,
+				04390DB31278A282B83062B2 /* Pods */,
+				27EBB6CBC7F565DFFCD884EA /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -65,10 +93,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 431AAFE42F0E448D0094962E /* Build configuration list for PBXNativeTarget "Go Line" */;
 			buildPhases = (
+				0BB2755D324CBAC98395A922 /* [CP] Check Pods Manifest.lock */,
 				431AAFE92F0E448D0094962E /* SwiftLint */,
 				431AAFCD2F0E448C0094962E /* Sources */,
 				431AAFCE2F0E448C0094962E /* Frameworks */,
 				431AAFCF2F0E448C0094962E /* Resources */,
+				9A6A51AD36E33A06AC917A9E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -78,8 +108,6 @@
 				431AAFD32F0E448C0094962E /* Go Line */,
 			);
 			name = "Go Line";
-			packageProductDependencies = (
-			);
 			productName = "Go Line";
 			productReference = 431AAFD12F0E448C0094962E /* Go Line.app */;
 			productType = "com.apple.product-type.application";
@@ -129,6 +157,28 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		0BB2755D324CBAC98395A922 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Go Line-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		431AAFE92F0E448D0094962E /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -148,6 +198,23 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ \"$CONFIGURATION\" = \"Debug\" ]; then\n  SWIFTLINT=\"/opt/homebrew/bin/swiftlint\"\n\n  if [ -f \"$SWIFTLINT\" ]; then\n    \"$SWIFTLINT\" || true\n  elif command -v swiftlint >/dev/null 2>&1; then\n    swiftlint || true\n  else\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\n  fi\nfi\n\n";
 		};
+		9A6A51AD36E33A06AC917A9E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Go Line/Pods-Go Line-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Go Line/Pods-Go Line-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Go Line/Pods-Go Line-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -163,6 +230,7 @@
 /* Begin XCBuildConfiguration section */
 		431AAFE52F0E448D0094962E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2699CBCE0CA798C30E153C2D /* Pods-Go Line.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -199,6 +267,7 @@
 		};
 		431AAFE62F0E448D0094962E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EFED85C2D8DED313C07C6B0C /* Pods-Go Line.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

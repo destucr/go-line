@@ -1,48 +1,41 @@
 import Foundation
+import RxSwift
+import RxRelay
 
 class CurrencyManager {
     static let shared = CurrencyManager()
     
-    private var _totalThread: Int = 0
+    private let totalThreadRelay = BehaviorRelay<Int>(value: 0)
     private let queue = DispatchQueue(label: "CurrencyManager.queue")
     
-    var totalThread: Int {
-        return queue.sync { _totalThread }
+    var totalThread: Observable<Int> {
+        return totalThreadRelay.asObservable()
     }
     
-    // Callbacks
-    var onThreadUpdate: ((Int) -> Void)?
+    var currentTotalThread: Int {
+        return totalThreadRelay.value
+    }
     
     private init() {}
     
     func addThread(_ amount: Int) {
         queue.async {
-            self._totalThread += amount
-            let newTotal = self._totalThread
-            DispatchQueue.main.async {
-                self.onThreadUpdate?(newTotal)
-            }
+            let newTotal = self.totalThreadRelay.value + amount
+            self.totalThreadRelay.accept(newTotal)
         }
     }
     
     func spendThread(_ amount: Int) -> Bool {
         return queue.sync {
-            guard _totalThread >= amount else { return false }
-            _totalThread -= amount
-            let newTotal = _totalThread
-            DispatchQueue.main.async {
-                self.onThreadUpdate?(newTotal)
-            }
+            let current = self.totalThreadRelay.value
+            guard current >= amount else { return false }
+            let newTotal = current - amount
+            self.totalThreadRelay.accept(newTotal)
             return true
         }
     }
     
     func reset() {
-        queue.async {
-            self._totalThread = 0
-            DispatchQueue.main.async {
-                self.onThreadUpdate?(0)
-            }
-        }
+        totalThreadRelay.accept(0)
     }
 }

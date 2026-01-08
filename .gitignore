@@ -23,6 +23,10 @@ IDETemplateMacros.plist
 .build/
 .swiftpm/
 
+## CocoaPods
+Pods/
+Go Line.xcworkspace
+
 ## App Store Connect
 fastlane/report.xml
 fastlane/Preview.html
@@ -36,3 +40,4 @@ fastlane/test_output
 *.hmap
 *.ipa
 ASSETS_PROMPTS.md
+swiftlint_report*.json

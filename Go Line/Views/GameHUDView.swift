@@ -94,7 +94,10 @@ struct HUDButton: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            SoundManager.shared.playSound("soft_click")
+            action()
+        }, label: {
             Image(systemName: icon)
                 .font(.system(size: 12, weight: .bold))
                 .frame(width: 32, height: 32)
@@ -108,6 +111,6 @@ struct HUDButton: View {
                         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                 )
                 .foregroundColor(Color(white: 0.15))
-        }
+        })
     }
 }

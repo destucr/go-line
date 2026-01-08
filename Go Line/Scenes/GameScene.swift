@@ -1,15 +1,19 @@
 internal import SpriteKit
+import RxSwift
+import RxRelay
 
 class GameScene: SKScene {
     
-    // MARK: - Navigation Callback
-    var onMenuTapped: (() -> Void)?
-    var onGameOver: ((Int, String) -> Void)?
-    var onScoreUpdate: ((Int) -> Void)?
-    var onLevelUpdate: ((Int) -> Void)?
-    var onTimeUpdate: ((String, String, Float) -> Void)? // Day, Time, Progress
-    var onTensionUpdate: ((CGFloat) -> Void)?
-    var onDayComplete: ((Int) -> Void)?
+    private let disposeBag = DisposeBag()
+    
+    // MARK: - Navigation Relays
+    let menuTappedRelay = PublishRelay<Void>()
+    let gameOverRelay = PublishRelay<(score: Int, message: String)>()
+    let scoreUpdateRelay = BehaviorRelay<Int>(value: 0)
+    let levelUpdateRelay = BehaviorRelay<Int>(value: 1)
+    let timeUpdateRelay = PublishRelay<(day: String, time: String, progress: Float)>()
+    let tensionUpdateRelay = BehaviorRelay<CGFloat>(value: 0.0)
+    let dayCompleteRelay = PublishRelay<Int>()
     
     // MARK: - Game State
     var gameStations: [Station] = []
@@ -19,7 +23,11 @@ class GameScene: SKScene {
     var isGamePaused = false
     
     // Core Loop
-    var level: Int = 1
+    var level: Int = 1 {
+        didSet {
+            levelUpdateRelay.accept(level)
+        }
+    }
     var trainSpeedMultiplier: CGFloat = 1.0
     
     // Mission Progress
@@ -28,8 +36,7 @@ class GameScene: SKScene {
     var missionLabel: SKLabelNode?
     var score: Int = 0 {
         didSet {
-            onScoreUpdate?(score)
-            // checkLevelUp() // Removed: Old progression
+            scoreUpdateRelay.accept(score)
         }
     }
     
@@ -44,12 +51,13 @@ class GameScene: SKScene {
     // Tension (Health)
     var tension: CGFloat = 0.0 {
         didSet {
-            onTensionUpdate?(tension)
+            tensionUpdateRelay.accept(tension)
         }
     }
     
+    let maxTensionRelay = BehaviorRelay<CGFloat>(value: 100.0)
     var maxTension: CGFloat {
-        return 100.0 + CGFloat(UpgradeManager.shared.maxTensionBonus)
+        return maxTensionRelay.value
     }
     
     // MARK: - View Cache
@@ -61,7 +69,11 @@ class GameScene: SKScene {
     // MARK: - Interaction State
     var currentDraftLine: SKShapeNode?
     var startStationID: UUID?
-    var currentLineColor: UIColor = .systemRed
+    let currentLineColorRelay = BehaviorRelay<UIColor>(value: .systemRed)
+    var currentLineColor: UIColor {
+        get { return currentLineColorRelay.value }
+        set { currentLineColorRelay.accept(newValue) }
+    }
     var isPanning: Bool = false
     var lastTouchPosition: CGPoint = .zero
 
@@ -88,30 +100,33 @@ class GameScene: SKScene {
         isUserInteractionEnabled = true
         
         // Listen for Upgrades
-        UpgradeManager.shared.onUpgradePurchased = { [weak self] in
-            DispatchQueue.main.async {
+        UpgradeManager.shared.upgradePurchased
+            .startWith(())
+            .subscribe(onNext: { [weak self] in
                 self?.updateAllStationsCapacity()
-            }
-        }
+                self?.maxTensionRelay.accept(100.0 + CGFloat(UpgradeManager.shared.maxTensionBonus))
+            })
+            .disposed(by: disposeBag)
         
         // Setup Day Cycle
-        DayCycleManager.shared.onTimeUpdate = { [weak self] timeStr, progress in
-            self?.onTimeUpdate?("Day \(DayCycleManager.shared.currentDay)", timeStr, progress)
-        }
+        DayCycleManager.shared.timeUpdate
+            .subscribe(onNext: { [weak self] timeStr, progress in
+                self?.timeUpdateRelay.accept(("Day \(DayCycleManager.shared.currentDayValue)", timeStr, progress))
+            })
+            .disposed(by: disposeBag)
         
-        DayCycleManager.shared.onDayEnd = { [weak self] day in
-            self?.handleDayEnd(day: day)
-        }
+        DayCycleManager.shared.dayEnd
+            .subscribe(onNext: { [weak self] day in
+                self?.handleDayEnd(day: day)
+            })
+            .disposed(by: disposeBag)
         
         DayCycleManager.shared.startDay()
         
         if !isCreated {
-            // createCityMap() // Removed for white background
-            // createHUD() // Legacy removed
             spawnCityStations()
             showTutorialHint()
             updateLockedLines()
-            // createSewingScraps() // Removed for white background
             isCreated = true
         }
         layoutUI()
@@ -133,20 +148,17 @@ class GameScene: SKScene {
         isGamePaused = true
         level += 1
         handleLevelUp()
-        onDayComplete?(day)
+        dayCompleteRelay.accept(day)
     }
     
     func advanceDay() {
         isGamePaused = false
-        lastUpdateTime = 0 // Reset timer to prevent dt jump
-        // Slower tension recovery overnight
+        lastUpdateTime = 0
         tension = max(0, tension - 20)
         DayCycleManager.shared.startDay()
     }
     
     func setCameraZoom(_ scale: CGFloat) {
-        // Clamp zoom between 0.5x and 2.0x of base level scale
-        // Higher level might have smaller base scale (zoomed out)
         let minZoom: CGFloat = 0.3
         let maxZoom: CGFloat = 2.0
         

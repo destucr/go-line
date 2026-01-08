@@ -31,7 +31,10 @@ struct ConfirmationPopupView: View {
                     .padding(.horizontal, 20)
                 
                 HStack(spacing: 20) {
-                    Button(action: onCancel) {
+                    Button(action: {
+                        SoundManager.shared.playSound("sfx_click_cancel")
+                        onCancel()
+                    }, label: {
                         Text(cancelText)
                             .font(.system(size: 16, weight: .black, design: .monospaced))
                             .frame(width: 140, height: 50)
@@ -43,9 +46,12 @@ struct ConfirmationPopupView: View {
                                     .stroke(Color.white.opacity(0.3), lineWidth: 1)
                             )
                             .contentShape(Rectangle())
-                    }
+                    })
                     
-                    Button(action: onExit) {
+                    Button(action: {
+                        SoundManager.shared.playSound("soft_click")
+                        onExit()
+                    }, label: {
                         Text(exitText)
                             .font(.system(size: 16, weight: .black, design: .monospaced))
                             .frame(width: 140, height: 50)
@@ -53,7 +59,7 @@ struct ConfirmationPopupView: View {
                             .foregroundColor(.black)
                             .cornerRadius(6)
                             .contentShape(Rectangle())
-                    }
+                    })
                 }
             }
             .padding(.vertical, 40)

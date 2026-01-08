@@ -45,15 +45,19 @@ Draw curved, "stitched" paths between stations using an intuitive touch-drag int
 ## 🛠️ Technical Stack
 - **Engine:** SpriteKit (2D Game Engine)
 - **UI:** SwiftUI (HUD, Shop, and Menus)
+- **Reactive Logic:** RxSwift / RxCocoa
+- **Dependency Management:** CocoaPods
 - **Language:** Swift 5.10
-- **Architecture:** Manager-based state management
+- **Architecture:** Reactive state management with Manager-based relays.
 - **Visuals:** Custom GLSL Shaders for paper textures and dashed path rendering.
 
 ## 🚀 Getting Started
 1. Clone the repository.
-2. Open `Go Line.xcodeproj` in Xcode 15+.
-3. Select a Landscape-oriented Simulator (e.g., iPhone 15 Pro).
-4. Build and Run!
+2. Ensure you have [CocoaPods](https://cocoapods.org/) installed (`brew install cocoapods`).
+3. Run `pod install` in the project root.
+4. **Important:** Open **`Go Line.xcworkspace`** in Xcode 15+.
+5. Select a Landscape-oriented Simulator (e.g., iPhone 15 Pro).
+6. Build and Run!
 
 ---
 *Created for fans of minimalist strategy and transit sims.*

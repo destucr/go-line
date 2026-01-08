@@ -81,7 +81,7 @@ class MenuViewController: UIViewController {
     }
     
     @objc private func playTapped() {
-        playSound(named: "soft_click")
+        SoundManager.shared.playSound("soft_click")
         UIView.animate(withDuration: 0.05, animations: {
             self.playButton.alpha = 0.7
         }, completion: { _ in
@@ -91,11 +91,9 @@ class MenuViewController: UIViewController {
     }
     
     @objc private func guideTapped() {
-        playSound(named: "soft_click")
+        SoundManager.shared.playSound("soft_click")
         self.onGuideTapped?()
     }
-    
-    private func playSound(named name: String) { }
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .landscape

@@ -2,10 +2,6 @@ import SwiftUI
 
 struct ShopView: View {
     @ObservedObject var hudManager = HUDManager.shared
-    @State private var totalThread: Int = CurrencyManager.shared.totalThread
-    @State private var carriageLevel: Int = UpgradeManager.shared.carriageCount
-    @State private var speedLevel: Int = UpgradeManager.shared.speedLevel
-    @State private var strengthLevel: Int = UpgradeManager.shared.strengthLevel
     
     var day: Int
     var onStartNextDay: () -> Void
@@ -68,7 +64,7 @@ struct ShopView: View {
                         Image(systemName: "f.circle.fill")
                             .foregroundColor(accentColor)
                             .font(.system(size: 20))
-                        Text("\(totalThread)")
+                        Text("\(hudManager.thread)")
                             .font(.system(size: 24, weight: .bold, design: .monospaced))
                             .foregroundColor(.white)
                         Text("AVAILABLE THREAD")
@@ -85,14 +81,13 @@ struct ShopView: View {
                             icon: "tram.fill",
                             title: "New Carriage",
                             description: "+6 Capacity",
-                            level: carriageLevel,
+                            level: hudManager.carriageLevel,
                             cost: UpgradeManager.shared.getCarriageCost(),
-                            isAffordable: totalThread >= UpgradeManager.shared.getCarriageCost()
+                            isAffordable: hudManager.thread >= UpgradeManager.shared.getCarriageCost()
                         ) {
                             SoundManager.shared.playSound("soft_click")
                             if UpgradeManager.shared.buyCarriage() {
                                 SoundManager.shared.playSound("sfx_levelup")
-                                syncState()
                             }
                         }
                         
@@ -100,14 +95,13 @@ struct ShopView: View {
                             icon: "bolt.fill",
                             title: "Faster Needle",
                             description: "+15% Speed",
-                            level: speedLevel,
+                            level: hudManager.speedLevel,
                             cost: UpgradeManager.shared.getSpeedCost(),
-                            isAffordable: totalThread >= UpgradeManager.shared.getSpeedCost()
+                            isAffordable: hudManager.thread >= UpgradeManager.shared.getSpeedCost()
                         ) {
                             SoundManager.shared.playSound("soft_click")
                             if UpgradeManager.shared.buySpeed() {
                                 SoundManager.shared.playSound("sfx_levelup")
-                                syncState()
                             }
                         }
                         
@@ -115,14 +109,13 @@ struct ShopView: View {
                             icon: "shield.fill",
                             title: "Fabric Strength",
                             description: "+25 Max Tension",
-                            level: strengthLevel,
+                            level: hudManager.strengthLevel,
                             cost: UpgradeManager.shared.getStrengthCost(),
-                            isAffordable: totalThread >= UpgradeManager.shared.getStrengthCost()
+                            isAffordable: hudManager.thread >= UpgradeManager.shared.getStrengthCost()
                         ) {
                             SoundManager.shared.playSound("soft_click")
                             if UpgradeManager.shared.buyStrength() {
                                 SoundManager.shared.playSound("sfx_levelup")
-                                syncState()
                             }
                         }
                     }
@@ -149,13 +142,6 @@ struct ShopView: View {
                 .padding(.bottom, 20)
             }
         }
-    }
-    
-    private func syncState() {
-        totalThread = CurrencyManager.shared.totalThread
-        carriageLevel = UpgradeManager.shared.carriageCount
-        speedLevel = UpgradeManager.shared.speedLevel
-        strengthLevel = UpgradeManager.shared.strengthLevel
     }
 }
 
