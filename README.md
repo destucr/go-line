@@ -4,7 +4,7 @@
 
 Go Line is a zen transit management simulator. Draw colorful transit lines to transport passengers, managing efficiency and flow as your city grows.
 
-![Gameplay Preview](screenshots/gameplay-full.PNG)
+![Gameplay Preview](screenshots/goline-gameplay-full.webp)
 
 ## Stats
 
