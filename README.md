@@ -65,34 +65,23 @@ Draw curved, stitched paths between stations with touch-drag controls. Quadratic
 
 | Menu | Shop | Gameplay |
 | :---: | :---: | :---: |
-| ![Menu](screenshots/homescreen.PNG) | ![Shop](screenshots/upgrade-shop.PNG) | ![Guide](screenshots/gameplay-full.PNG) |
+| ![Menu](screenshots/goline-homescreen.webp) | ![Shop](screenshots/goline-upgrade-shop.webp) | ![Guide](screenshots/goline-gameplay-full.webp) |
 
-## Technical Stack
-
-- **Engine:** SpriteKit
-- **UI:** SwiftUI
+## 🛠️ Technical Stack
+- **Engine:** SpriteKit (2D Game Engine)
+- **UI:** SwiftUI (HUD, Shop, and Menus)
+- **Reactive Logic:** RxSwift / RxCocoa
+- **Dependency Management:** CocoaPods
 - **Language:** Swift 5.10
-- **Architecture:** Manager-based state management
-- **Visuals:** Custom GLSL shaders for textures and dashed rendering
-
-## Getting Started
+- **Architecture:** Reactive state management with Manager-based relays.
+- **Visuals:** Custom GLSL Shaders for paper textures and dashed path rendering.
 
 1. Clone the repository.
-2. Open `Go Line.xcodeproj` in Xcode 15+.
-3. Select a landscape simulator (e.g., iPhone 15 Pro).
-4. Build and run.
-
-## Contributing
-
-Contributions are welcome! Feel free to:
-
-- 🐛 Report bugs
-- 💡 Suggest features
-- 🔧 Submit pull requests
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+2. Ensure you have [CocoaPods](https://cocoapods.org/) installed (`brew install cocoapods`).
+3. Run `pod install` in the project root.
+4. **Important:** Open **`Go Line.xcworkspace`** in Xcode 15+.
+5. Select a Landscape-oriented Simulator (e.g., iPhone 15 Pro).
+6. Build and Run!
 
 ---
 

@@ -163,7 +163,7 @@ class ShopViewController: UIViewController {
     func refreshUpgrades() {
         updateThreadDisplay()
         
-        let total = CurrencyManager.shared.totalThread
+        let total = CurrencyManager.shared.currentTotalThread
         
         for btn in upgradeButtons {
             var cost = 0
@@ -198,14 +198,15 @@ class ShopViewController: UIViewController {
     }
     
     func updateThreadDisplay() {
-        threadLabel.text = "THREAD: \(CurrencyManager.shared.totalThread)"
+        threadLabel.text = "THREAD: \(CurrencyManager.shared.currentTotalThread)"
     }
     
     func playSound(_ name: String) {
-        print("Play Sound: \(name)")
+        SoundManager.shared.playSound(name)
     }
     
     @objc func handleNextDay() {
+        SoundManager.shared.playSound("soft_click")
         onNextDay?()
         dismiss(animated: true, completion: nil)
     }

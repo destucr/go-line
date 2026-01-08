@@ -11,6 +11,9 @@ struct HUDState {
     let level: Int
     let dayProgress: Float
     let selectedColor: UIColor
+    let carriageLevel: Int
+    let speedLevel: Int
+    let strengthLevel: Int
 }
 
 class HUDManager: ObservableObject {
@@ -25,6 +28,9 @@ class HUDManager: ObservableObject {
     @Published var level: Int = 1
     @Published var dayProgress: Float = 0.0
     @Published var selectedColor: UIColor = .systemRed
+    @Published var carriageLevel: Int = 0
+    @Published var speedLevel: Int = 0
+    @Published var strengthLevel: Int = 0
     
     private init() {}
     
@@ -38,6 +44,9 @@ class HUDManager: ObservableObject {
         self.level = state.level
         self.dayProgress = state.dayProgress
         self.selectedColor = state.selectedColor
+        self.carriageLevel = state.carriageLevel
+        self.speedLevel = state.speedLevel
+        self.strengthLevel = state.strengthLevel
     }
     
     func reset() {
@@ -50,5 +59,8 @@ class HUDManager: ObservableObject {
         level = 1
         dayProgress = 0
         selectedColor = .systemRed
+        carriageLevel = 0
+        speedLevel = 0
+        strengthLevel = 0
     }
 }

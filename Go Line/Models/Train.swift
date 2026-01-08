@@ -10,7 +10,7 @@ struct Train: Identifiable {
     var carriages: Int = 0
     
     var capacity: Int {
-        return 6 + (carriages * 6)
+        return 4 + (carriages * 4) // Reduced base to 4 to make upgrades more impactful
     }
     
     // Movement State

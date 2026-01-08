@@ -1,8 +1,13 @@
 import UIKit
 import SwiftUI
+import RxSwift
+import RxCocoa
 internal import SpriteKit
 
 class GameViewController: UIViewController {
+    
+    private let disposeBag = DisposeBag()
+    private var sceneDisposeBag = DisposeBag()
     
     // SwiftUI Hosting
     private var hudHostingController: UIHostingController<GameHUDView>?
@@ -12,7 +17,6 @@ class GameViewController: UIViewController {
     
     private var skView: SKView!
     private var gameScene: GameScene?
-    private var dayProgress: Float = 0.0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,6 +60,7 @@ class GameViewController: UIViewController {
         selectionHostingController?.view.removeFromSuperview()
         selectionHostingController?.removeFromParent()
         
+        sceneDisposeBag = DisposeBag()
         HUDManager.shared.reset()
         
         let scene = GameScene(size: skView.bounds.size)
@@ -97,77 +102,87 @@ class GameViewController: UIViewController {
         selectionHosting.didMove(toParent: self)
         self.selectionHostingController = selectionHosting
 
-        // Callbacks
-        gameScene?.onMenuTapped = { [weak self] in
-            self?.playSound(named: "sfx_click_cancel")
-            self?.onExitTapped?()
-        }
-        
-        gameScene?.onGameOver = { [weak self] finalScore, reason in
-            self?.showGameOverOverlay(score: finalScore, reason: reason)
-        }
-        
-        gameScene?.onScoreUpdate = { [weak self] _ in
-            self?.updateHUD()
-        }
-        
-        gameScene?.onTimeUpdate = { [weak self] _, _, progress in
-            self?.dayProgress = progress
-            self?.updateHUD()
-        }
-        
-        CurrencyManager.shared.onThreadUpdate = { [weak self] _ in
-            self?.updateHUD()
-        }
-        
-        gameScene?.onTensionUpdate = { [weak self] _ in
-            self?.updateHUD()
-        }
-        
-        gameScene?.onDayComplete = { [weak self] day in
-            DispatchQueue.main.async {
+        // Bindings
+        scene.menuTappedRelay
+            .subscribe(onNext: { [weak self] in
+                self?.playSound(named: "sfx_click_cancel")
+                self?.onExitTapped?()
+            })
+            .disposed(by: sceneDisposeBag)
+            
+        scene.gameOverRelay
+            .subscribe(onNext: { [weak self] data in
+                self?.showGameOverOverlay(score: data.score, reason: data.message)
+            })
+            .disposed(by: sceneDisposeBag)
+            
+        scene.dayCompleteRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] day in
                 self?.showShop(day: day)
-            }
-        }
-        
-        gameScene?.onLevelUpdate = { [weak self] level in
-            DispatchQueue.main.async {
+            })
+            .disposed(by: sceneDisposeBag)
+            
+        scene.levelUpdateRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] level in
                 self?.updateLineButtons(level: level)
-                self?.updateHUD()
-            }
-        }
-        
-        skView.presentScene(gameScene)
+            })
+            .disposed(by: sceneDisposeBag)
+            
+        bindHUD(to: scene)
+
+        skView.presentScene(scene)
         
         // Initial State
-        self.dayProgress = 0
-        updateHUD()
         updateLineButtons(level: 1)
     }
     
-    private func updateHUD() {
-        guard let scene = gameScene else { return }
+    private func bindHUD(to scene: GameScene) {
+        let score = scene.scoreUpdateRelay.asObservable()
+        let day = DayCycleManager.shared.currentDay.map { "\($0)" }
+        let timeUpdate = DayCycleManager.shared.timeUpdate
+        let thread = CurrencyManager.shared.totalThread
+        let tension = scene.tensionUpdateRelay.asObservable()
+        let maxTension = scene.maxTensionRelay.asObservable()
+        let level = scene.levelUpdateRelay.asObservable()
+        let selectedColor = scene.currentLineColorRelay.asObservable()
+        let upgrades = UpgradeManager.shared.upgradePurchased.startWith(())
         
-        DispatchQueue.main.async {
-            let state = HUDState(
-                stitches: scene.score,
-                day: "\(DayCycleManager.shared.currentDay)",
-                time: DayCycleManager.shared.currentTimeString,
-                thread: CurrencyManager.shared.totalThread,
-                tension: scene.tension,
-                maxTension: scene.maxTension,
-                level: scene.level,
-                dayProgress: self.dayProgress,
-                selectedColor: scene.currentLineColor
+        let gameState = Observable.combineLatest(score, tension, maxTension, level)
+        let environment = Observable.combineLatest(day, timeUpdate)
+        let player = Observable.combineLatest(thread, selectedColor, upgrades)
+        
+        Observable.combineLatest(gameState, environment, player) { gameState, env, player in
+            let (score, tension, maxTension, level) = gameState
+            let (day, time) = env
+            let (thread, color, _) = player
+            
+            return HUDState(
+                stitches: score,
+                day: day,
+                time: time.timeString,
+                thread: thread,
+                tension: tension,
+                maxTension: maxTension,
+                level: level,
+                dayProgress: time.progress,
+                selectedColor: color,
+                carriageLevel: UpgradeManager.shared.carriageCount,
+                speedLevel: UpgradeManager.shared.speedLevel,
+                strengthLevel: UpgradeManager.shared.strengthLevel
             )
-            HUDManager.shared.update(with: state)
         }
+        .observe(on: MainScheduler.instance)
+        .subscribe(onNext: { state in
+            HUDManager.shared.update(with: state)
+        })
+        .disposed(by: sceneDisposeBag)
     }
     
     private func handleColorSelection(_ color: UIColor) {
         playSound(named: "soft_click")
         gameScene?.currentLineColor = color
-        updateHUD()
     }
     
     private func updateLineButtons(level: Int) {
@@ -181,8 +196,6 @@ class GameViewController: UIViewController {
                 handleColorSelection(.systemRed)
             } else if level < 2 && scene.currentLineColor == .systemBlue {
                 handleColorSelection(.systemRed)
-            } else {
-                updateHUD()
             }
         }
     }
@@ -273,7 +286,7 @@ class GameViewController: UIViewController {
     }
     
     private func playSound(named name: String) {
-        gameScene?.run(SKAction.playSoundFileNamed(name, waitForCompletion: false))
+        SoundManager.shared.playSound(name)
     }
     
     @objc private func handlePause() {

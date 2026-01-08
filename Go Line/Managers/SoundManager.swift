@@ -7,7 +7,7 @@ class SoundManager {
     private var players: [String: AVAudioPlayer] = [:]
     
     private init() {}
-    
+
     func playSound(_ name: String) {
         // Handle different extensions
         let fileName: String

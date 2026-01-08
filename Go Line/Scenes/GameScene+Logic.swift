@@ -1,4 +1,6 @@
 internal import SpriteKit
+import RxSwift
+import RxRelay
 
 extension GameScene {
     
@@ -202,7 +204,6 @@ extension GameScene {
         ]))
         
         updateLockedLines()
-        onLevelUpdate?(level)
         
         run(SKAction.playSoundFileNamed("sfx_levelup.wav", waitForCompletion: false))
         
@@ -298,7 +299,7 @@ extension GameScene {
         isGameOver = true
         // Thematic copy for metro management
         let themedReason = "Metro Network Failure: Line Overload"
-        onGameOver?(score, themedReason)
+        gameOverRelay.accept((score, themedReason))
     }
     
     func spawnRandomPassenger() {

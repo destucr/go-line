@@ -27,6 +27,7 @@ struct LineSelectionView: View {
                 let isSelected = hudManager.selectedColor == color
                 
                 Button(action: {
+                    SoundManager.shared.playSound("soft_click")
                     if isUnlocked {
                         onColorSelected(color)
                     }

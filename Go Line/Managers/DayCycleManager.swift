@@ -1,29 +1,36 @@
 import Foundation
+import RxSwift
+import RxRelay
 
 class DayCycleManager {
     static let shared = DayCycleManager()
     
     // Config
-    let dayDuration: TimeInterval = 120.0 // 2 minutes per day
-    // let dayDuration: TimeInterval = 10.0 // DEBUG FASTER
-    
-    let startHour: Int = 6 // 6:00 AM
-    let endHour: Int = 22 // 10:00 PM (16 hours shift)
+    let dayDuration: TimeInterval = 120.0
+    let startHour: Int = 6
+    let endHour: Int = 22
     
     // State
-    var currentDay: Int = 1
-    var currentTime: TimeInterval = 0.0 // Elapsed time in current day
+    private let currentDayRelay = BehaviorRelay<Int>(value: 1)
+    var currentTime: TimeInterval = 0.0
     var isDayRunning: Bool = false
     
-    // Callbacks
-    var onTimeUpdate: ((_ timeString: String, _ progress: Float) -> Void)?
-    var onDayEnd: ((_ day: Int) -> Void)?
-    var onDayStart: ((_ day: Int) -> Void)?
+    // Observables
+    private let timeUpdateRelay = PublishRelay<(timeString: String, progress: Float)>()
+    private let dayEndRelay = PublishRelay<Int>()
+    private let dayStartRelay = PublishRelay<Int>()
+    
+    var currentDay: Observable<Int> { return currentDayRelay.asObservable() }
+    var timeUpdate: Observable<(timeString: String, progress: Float)> { return timeUpdateRelay.asObservable() }
+    var dayEnd: Observable<Int> { return dayEndRelay.asObservable() }
+    var dayStart: Observable<Int> { return dayStartRelay.asObservable() }
+    
+    var currentDayValue: Int { return currentDayRelay.value }
     
     private init() {}
     
     func reset() {
-        currentDay = 1
+        currentDayRelay.accept(1)
         currentTime = 0
         isDayRunning = false
     }
@@ -31,7 +38,7 @@ class DayCycleManager {
     func startDay() {
         currentTime = 0
         isDayRunning = true
-        onDayStart?(currentDay)
+        dayStartRelay.accept(currentDayRelay.value)
     }
     
     func update(dt: TimeInterval) {
@@ -39,7 +46,6 @@ class DayCycleManager {
         
         currentTime += dt
         
-        // Calculate Game Time
         let dayProgress = max(0, min(1.0, Float(currentTime / dayDuration)))
         let totalHours = endHour - startHour
         let currentGameHour = Double(startHour) + Double(totalHours) * Double(dayProgress)
@@ -48,7 +54,7 @@ class DayCycleManager {
         let minute = Int((currentGameHour - Double(hour)) * 60)
         let timeString = String(format: "%02d:%02d", hour, minute)
         
-        onTimeUpdate?(timeString, dayProgress)
+        timeUpdateRelay.accept((timeString, dayProgress))
         
         if currentTime >= dayDuration {
             endDay()
@@ -66,7 +72,7 @@ class DayCycleManager {
     
     private func endDay() {
         isDayRunning = false
-        onDayEnd?(currentDay)
-        currentDay += 1 // Advance day
+        dayEndRelay.accept(currentDayRelay.value)
+        currentDayRelay.accept(currentDayRelay.value + 1)
     }
 }

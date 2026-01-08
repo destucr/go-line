@@ -1,4 +1,6 @@
 import Foundation
+import RxSwift
+import RxRelay
 
 class UpgradeManager {
     static let shared = UpgradeManager()
@@ -10,15 +12,16 @@ class UpgradeManager {
     
     // Multipliers / Effects
     var speedMultiplier: Double {
-        return 1.0 + (Double(speedLevel) * 0.15) // +15% per level
+        return 1.0 + (Double(speedLevel) * 0.15)
     }
     
     var maxTensionBonus: Double {
-        return Double(strengthLevel) * 25.0 // +25 Tension per level
+        return Double(strengthLevel) * 25.0
     }
     
-    // Callbacks
-    var onUpgradePurchased: (() -> Void)?
+    // Observables
+    private let upgradePurchasedRelay = PublishRelay<Void>()
+    var upgradePurchased: Observable<Void> { return upgradePurchasedRelay.asObservable() }
     
     private init() {}
     
@@ -33,7 +36,7 @@ class UpgradeManager {
         let cost = 100 + (carriageCount * 50)
         if CurrencyManager.shared.spendThread(cost) {
             carriageCount += 1
-            onUpgradePurchased?()
+            upgradePurchasedRelay.accept(())
             return true
         }
         return false
@@ -43,7 +46,7 @@ class UpgradeManager {
         let cost = 150 + (speedLevel * 75)
         if CurrencyManager.shared.spendThread(cost) {
             speedLevel += 1
-            onUpgradePurchased?()
+            upgradePurchasedRelay.accept(())
             return true
         }
         return false
@@ -53,7 +56,7 @@ class UpgradeManager {
         let cost = 200 + (strengthLevel * 100)
         if CurrencyManager.shared.spendThread(cost) {
             strengthLevel += 1
-            onUpgradePurchased?()
+            upgradePurchasedRelay.accept(())
             return true
         }
         return false

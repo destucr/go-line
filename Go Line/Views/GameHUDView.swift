@@ -6,86 +6,115 @@ struct GameHUDView: View {
     var onPause: () -> Void
     var onMenu: () -> Void
     
-    // Industrial Palette for Light Background
-    private let textPrimary = Color(white: 0.15)
-    private let textSecondary = Color(white: 0.4)
-    private let accentColor = Color.orange
-    private let containerBg = Color.white.opacity(0.85)
-    private let strokeColor = Color(white: 0.1).opacity(0.1)
-    
     var body: some View {
-        VStack(spacing: 8) {
-            // Top Bar
-            HStack(alignment: .center) {
-                // Left: Controls
-                HStack(spacing: 8) {
+        VStack(spacing: 0) {
+            // Dashboard Header
+            HStack(alignment: .top, spacing: 0) {
+                
+                // LEFT: Controls
+                HStack(spacing: 0) {
                     HUDButton(icon: "pause.fill", action: onPause)
+                    Rectangle().fill(Color.black).frame(width: 2, height: 44)
                     HUDButton(icon: "line.3.horizontal", action: onMenu)
                 }
-                .frame(width: 100, alignment: .leading)
+                .background(Color.white)
+                .border(Color.black, width: 2)
                 
                 Spacer()
                 
-                // Center: Score/Stitches
-                VStack(spacing: 0) {
-                    Text("\(hudManager.stitches)")
-                        .font(.system(size: 32, weight: .black, design: .monospaced))
-                        .foregroundColor(textPrimary)
-                    Text("STITCHES")
-                        .font(.system(size: 8, weight: .black))
-                        .foregroundColor(textSecondary)
-                }
-                .frame(minWidth: 80)
-                
-                Spacer()
-                
-                // Right: Thread & Shift
-                VStack(alignment: .trailing, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "f.circle.fill")
-                            .foregroundColor(Color(red: 0.8, green: 0.4, blue: 0.0)) // Darker Orange
-                            .font(.system(size: 14, weight: .bold))
-                        Text("\(hudManager.thread)")
-                            .font(.system(size: 20, weight: .bold, design: .monospaced))
-                            .foregroundColor(textPrimary)
+                // CENTER: Primary Score (Ticket Style)
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("NET SCORE")
+                            .font(MetroTheme.dataFont(size: 8))
+                            .foregroundColor(MetroTheme.inkGray)
+                        Text("\(hudManager.stitches)")
+                            .font(MetroTheme.dataFont(size: 24))
+                            .foregroundColor(MetroTheme.inkBlack)
                     }
                     
-                    Text("DAY \(hudManager.day) • \(hudManager.time)")
-                        .font(.system(size: 9, weight: .black, design: .monospaced))
-                        .foregroundColor(textSecondary)
+                    Rectangle().fill(MetroTheme.inkBlack.opacity(0.1)).frame(width: 2, height: 30)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("THREAD")
+                            .font(MetroTheme.dataFont(size: 8))
+                            .foregroundColor(MetroTheme.inkGray)
+                        Text("\(hudManager.thread)")
+                            .font(MetroTheme.dataFont(size: 24))
+                            .foregroundColor(MetroTheme.inkBlack)
+                    }
                 }
-                .frame(width: 120, alignment: .trailing)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(Color.white)
+                .border(Color.black, width: 2)
+                .offset(y: 10) // Push down slightly to detach from top edge visually
+                
+                Spacer()
+                
+                // RIGHT: System Status (Meters & Time)
+                VStack(spacing: 0) {
+                    // Top Row: Time & Day
+                    HStack {
+                        Text("SHIFT \(hudManager.day)")
+                            .font(MetroTheme.dataFont(size: 10))
+                            .foregroundColor(MetroTheme.inkBlack)
+                        Spacer()
+                        Text(hudManager.time)
+                            .font(MetroTheme.dataFont(size: 10))
+                            .foregroundColor(MetroTheme.inkBlack)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(MetroTheme.safetyYellow)
+                    .border(Color.black, width: 2)
+                    
+                    // Meters Container
+                    VStack(spacing: 0) {
+                        // Tension Meter
+                        HStack(spacing: 8) {
+                            Text("TENS")
+                                .font(MetroTheme.dataFont(size: 9))
+                                .frame(width: 30, alignment: .leading)
+                            
+                            ProgressBar(
+                                icon: "waveform.path.ecg",
+                                progress: hudManager.tension / hudManager.maxTension,
+                                label: "", // Hide label inside bar
+                                color: hudManager.tension > 80 ? MetroTheme.alertRed : MetroTheme.inkBlack,
+                                isDark: false
+                            )
+                        }
+                        .padding(6)
+                        
+                        Divider().background(Color.black)
+                        
+                        // Shift Meter
+                        HStack(spacing: 8) {
+                            Text("TIME")
+                                .font(MetroTheme.dataFont(size: 9))
+                                .frame(width: 30, alignment: .leading)
+                            
+                            ProgressBar(
+                                icon: "clock.fill",
+                                progress: CGFloat(hudManager.dayProgress),
+                                label: "",
+                                color: MetroTheme.goGreen,
+                                isDark: false
+                            )
+                        }
+                        .padding(6)
+                    }
+                    .background(Color.white)
+                    .border(Color.black, width: 2)
+                }
+                .frame(width: 180) // Fixed width for stability
             }
             .padding(.horizontal, 20)
-            .padding(.top, 10)
+            .padding(.top, 20)
             
-            // Network Tension & Shift Progress
-            HStack(spacing: 30) {
-                ProgressBar(
-                    icon: "waveform.path.ecg",
-                    progress: hudManager.tension / hudManager.maxTension,
-                    label: "\(Int(hudManager.tension))%",
-                    color: hudManager.tension > 80 ? .red : accentColor,
-                    isDark: false
-                )
-                
-                ProgressBar(
-                    icon: "clock.fill",
-                    progress: CGFloat(hudManager.dayProgress),
-                    label: "\(Int(hudManager.dayProgress * 100))%",
-                    color: .green,
-                    isDark: false
-                )
-            }
-            .padding(.horizontal, 80)
-            .padding(.vertical, 6)
-            .background(
-                Capsule()
-                    .fill(Color.white.opacity(0.5))
-                    .padding(.horizontal, 60)
-            )
+            Spacer()
         }
-        .frame(maxWidth: .infinity)
     }
 }
 
@@ -94,20 +123,13 @@ struct HUDButton: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            action()
+        }, label: {
             Image(systemName: icon)
-                .font(.system(size: 12, weight: .bold))
-                .frame(width: 32, height: 32)
-                .background(
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.white.opacity(0.85))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 2)
-                                .stroke(Color(white: 0.1).opacity(0.1), lineWidth: 1)
-                        )
-                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-                )
-                .foregroundColor(Color(white: 0.15))
-        }
+                .font(.system(size: 16, weight: .bold))
+                .frame(width: 50, height: 44)
+                .foregroundColor(MetroTheme.inkBlack)
+        })
     }
 }
