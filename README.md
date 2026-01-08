@@ -65,7 +65,7 @@ Draw curved, stitched paths between stations with touch-drag controls. Quadratic
 
 | Menu | Shop | Gameplay |
 | :---: | :---: | :---: |
-| ![Menu](screenshots/homescreen.PNG) | ![Shop](screenshots/upgrade-shop.PNG) | ![Guide](screenshots/gameplay-full.PNG) |
+| ![Menu](screenshots/goline-homescreen.webp) | ![Shop](screenshots/goline-upgrade-shop.webp) | ![Guide](screenshots/goline-gameplay-full.webp) |
 
 ## 🛠️ Technical Stack
 - **Engine:** SpriteKit (2D Game Engine)
